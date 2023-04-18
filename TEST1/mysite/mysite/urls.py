@@ -15,10 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from main_dashboard_app import views 
+from maindashboardapp import views 
+from django.conf import settings
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
     path('main_dashboard', views.main_dashboard),
     path('cockpit_1', views.cockpit_1),
     path('cockpit_2', views.cockpit_2),
@@ -29,5 +32,15 @@ urlpatterns = [
     path('', views.apiOverview, name="api-overview"),
     path('task-list', views.taskList, name="task-list"),
     path('trigger-hit-list', views.triggerHitCases, name="trigger-hit-list"),
-    
-]
+    path('get-team-members', views.getTeamMembers, name="get-team-members"),
+    path('get-meeting-agenda', views.getMeetingAgenda, name="get-meeting-agenda"),
+    path('get-KpiDaily', views.getKpiDaily, name="get-KpiDaily"),
+    path('get-KpiByMonth', views.getKpiByMonth, name="get-KpiByMonth"),
+    path('get-KpiMonthlyKpi', views.getKpiMonthly, name="get-KpiMonthlyKpi"),
+    path('get-TTMonthlyKpi', views.getTTbyMonth, name="get-TTMonthlyKpi"),
+    path('get-kpiCockpit_2', views.getKpiCockpit_2, name="get-kpiCockpit_2"),
+    path('get-kpiCurrentCockpit_2', views.getCurrentKpiCockpit_2, name="get-kpiCurrentCockpit_2"),
+        
+    path('get-kpiUnion', views.getKpiMonthlyUnion, name="get-kpiUnion"),
+        
+] 

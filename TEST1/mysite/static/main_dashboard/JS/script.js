@@ -31,7 +31,7 @@ window.onload = function () {
     duration: 1200,
   });
 
-  
+
 };
 
 var externalCred = "&IllumLoginName=ap_cmn_srip&IllumLoginPassword=Pass12345";
@@ -39,14 +39,14 @@ var ipAddress = "";
 var contentType = "&IsTesting=T&Content-Type=text%2Fjson";
 
 function bannerimage(team) {
-const API =
+  const API =
     "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionTeams%2FXACT_SELECT_ALLBANNERS";
   const API_URL = ipAddress + API + contentType + externalCred;
   const Local_URL = "./JS/dummy_data/imgSelect.json";
 
   const params = {
-	'Param.1': team
-   };
+    'Param.1': team
+  };
   // console.log('k-', API_URL)
   ajaxCall(
     API_URL,
@@ -60,11 +60,11 @@ const API =
       document.getElementById("_uploadImg").style.display = "none";
       if (dataList && dataList.length > 0) {
         document.getElementById("_uploadImg").style.display = "block";
-        document.getElementById("_uploadImg").src = "data:image/png;base64,"+dataList[0].BASE64;
+        document.getElementById("_uploadImg").src = "data:image/png;base64," + dataList[0].BASE64;
         document.getElementById("teambannertitle").style.display = "none";
       } else {
         document.getElementById("teambannertitle").style.display = "block";
-         $("teambannertitle").text(team);
+        $("teambannertitle").text(team);
         // console.log("no data");
       }
     },
@@ -76,52 +76,52 @@ const API =
 
 function starimage(team) {
   const API =
-      "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionTeams%2FXACT_GET_STAROFTHEDAY";
-    const API_URL = ipAddress + API + contentType + externalCred;
-    const Local_URL = "./JS/dummy_data/imgSelect.json";
-  
-    const params = {
+    "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionTeams%2FXACT_GET_STAROFTHEDAY";
+  const API_URL = ipAddress + API + contentType + externalCred;
+  const Local_URL = "./JS/dummy_data/imgSelect.json";
+
+  const params = {
     'Param.1': team
-     };
-    // console.log('k-', API_URL)
-    ajaxCall(
-      API_URL,
-      params,
-      function (result) {
-        const dataList = result.Rowsets.Rowset
-          ? result.Rowsets.Rowset[0].Row
-          : [];
-        // console.log('img',dataList)
-        if (dataList && dataList.length > 0) {
-          document.getElementById("_staroftheday").src = "data:image/png;base64,"+dataList[0].BASE64;
-        } else {
-          document.getElementById("_staroftheday").src = "/XMII/CM/AP_SBT_MDT/main_dashboard/image/placeholder_starofday.png";
-          // console.log("no data");
-        }
-      },
-      function (err) {
-        console.log("err", err);
+  };
+  // console.log('k-', API_URL)
+  ajaxCall(
+    API_URL,
+    params,
+    function (result) {
+      const dataList = result.Rowsets.Rowset
+        ? result.Rowsets.Rowset[0].Row
+        : [];
+      // console.log('img',dataList)
+      if (dataList && dataList.length > 0) {
+        document.getElementById("_staroftheday").src = "data:image/png;base64," + dataList[0].BASE64;
+      } else {
+        document.getElementById("_staroftheday").src = "/XMII/CM/AP_SBT_MDT/main_dashboard/image/placeholder_starofday.png";
+        // console.log("no data");
       }
-    );
-  }
-  function escalationmodal() {
-    $("#escalationmodal").modal("open");
-  }
-function actiononescalation(data) {
-alert('Development on Progress');
+    },
+    function (err) {
+      console.log("err", err);
+    }
+  );
 }
-  function escalationcheck(team) {
-        document.getElementById("escalationbell").style.display = "none";
-    const split = team.split("-");
-    if(split[0] == 'MDT ') {
-      const API =
+function escalationmodal() {
+  $("#escalationmodal").modal("open");
+}
+function actiononescalation(data) {
+  alert('Development on Progress');
+}
+function escalationcheck(team) {
+  document.getElementById("escalationbell").style.display = "none";
+  const split = team.split("-");
+  if (split[0] == 'MDT ') {
+    const API =
       "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FXact%2FXACT_GET_ESCALATIONS";
     const API_URL = ipAddress + API + contentType + externalCred;
     const Local_URL = "./JS/dummy_data/imgSelect.json";
-  
+
     const params = {
-    'Param.1': team
-     };
+      'Param.1': team
+    };
     // console.log('k-', API_URL)
     ajaxCall(
       API_URL,
@@ -133,7 +133,7 @@ alert('Development on Progress');
         document.getElementById("escalationbell").style.display = "none";
         if (dataList && dataList.length > 0) {
           $('#escalationcount').text(dataList.length);
-          $("#escalationbell").css("display", "block");      
+          $("#escalationbell").css("display", "block");
           var htm = "";
           $.each(dataList, function (i, item) {
             htm +=
@@ -149,10 +149,10 @@ alert('Development on Progress');
               //")'>" +
               //"Action" +
               //"</td>"+
-"</tr>";
-            });
-            $("#_escalation tbody").html(htm);
-          
+              "</tr>";
+          });
+          $("#_escalation tbody").html(htm);
+
         } else {
           document.getElementById("escalationbell").style.display = "none";
         }
@@ -160,25 +160,27 @@ alert('Development on Progress');
       function (err) {
         console.log("err", err);
       }
-    ); 
-    }
+    );
   }
-  async function selectTechno() {
-    let result = await (await fetch('http://127.0.0.1:8000/task-list')).json();
-    console.warn(result);
-    var htm = "";
-    if (result && result.length > 0) {
-      $.each(result, function (i, item) {
-        htm +=
-          "<option value='" +
-          item.team_name +
-          "'>" +
-          item.team_name +
-          "</option>";
-      });
-      $("#_TECHNOCRATS").append(htm);
-    }
+}
+async function selectTechno() {
+  let result = await (await fetch('http://127.0.0.1:8000/task-list')).json();
+  console.warn(result);
+  var htm = "";
+  if (result && result.length > 0) {
+    $.each(result, function (i, item) {
+      htm +=
+        "<option value='" +
+        item.shift +
+        "~" +
+        item.team_name +
+        "'>" +
+        item.team_name +
+        "</option>";
+    });
+    $("#_TECHNOCRATS").append(htm);
   }
+}
 
 // function selectTechno() {
 //   const API =
@@ -235,6 +237,7 @@ alert('Development on Progress');
 
 function listChart() {
   const split = $("#_TECHNOCRATS").val().split("~");
+  console.log(split);
   const shift = split[0];
   const team = split[1];
   Chart.helpers.each(Chart.instances, function (instance) {
@@ -245,28 +248,26 @@ function listChart() {
   const from =
     moment(dates[0], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
   const to = moment(dates[1], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
-  // console.log("team", team, from, to);
-  allMember(from, to, team);
-  bannerimage(team);
-  starimage(team);
-  escalationcheck(team);
-  particularMember(from, to, team);
+  console.log("team", team, from, to);
+  // allMember(from, to, team);
+  // bannerimage(team);
+  // starimage(team);
+  //escalationcheck(team);
+  // particularMember(from, to, team);
   executeData(team, shift);
-  checkStatus(team, shift);
-  // memberWho(team);  
+  // checkStatus(team, shift);
+  memberWho(team);
 }
-
 function allMember(from, to, team) {
-  const API = "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransaction%2FXACT_ATTENDANCE_NEWLOGIC";
-   // "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT/Query/XctAttendanceAll";
-  const API_URL = ipAddress + API + contentType + externalCred;
-  const Local_URL = "./JS/dummy_data/allMember.json";
-
-  const params = {
-    "Param.1": team,
-    "Param.2": from,
-    "Param.3": to,
-  };
+  // const API = "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransaction%2FXACT_ATTENDANCE_NEWLOGIC";
+  // // "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT/Query/XctAttendanceAll";
+  // const API_URL = ipAddress + API + contentType + externalCred;
+  // const Local_URL = "./JS/dummy_data/allMember.json";
+  // const params = {
+  //   "Param.1": team,
+  //   "Param.2": from,
+  //   "Param.3": to,
+  // };
   ajaxCall(
     API_URL,
     params,
@@ -284,8 +285,8 @@ function allMember(from, to, team) {
           label = [...label, date];
           data = [...data, item.percentage];
           barcolor = [...barcolor, item.percentage > 75
-                    ? "#26de81"
-                    : "#fc5c65"];
+            ? "#26de81"
+            : "#fc5c65"];
         });
         if (chartInstance["myChart1"]) {
           chartInstance["myChart1"].destroy();
@@ -304,6 +305,55 @@ function allMember(from, to, team) {
     }
   );
 }
+
+// function allMember(from, to, team) {
+//   const API = "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransaction%2FXACT_ATTENDANCE_NEWLOGIC";
+//   // "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT/Query/XctAttendanceAll";
+//   const API_URL = ipAddress + API + contentType + externalCred;
+//   const Local_URL = "./JS/dummy_data/allMember.json";
+
+//   const params = {
+//     "Param.1": team,
+//     "Param.2": from,
+//     "Param.3": to,
+//   };
+//   ajaxCall(
+//     API_URL,
+//     params,
+//     function (result) {
+//       const dataList = result.Rowsets.Rowset
+//         ? result.Rowsets.Rowset[0].Row
+//         : [];
+//       // console.log('all', dataList)
+//       if (dataList && dataList.length > 0) {
+//         let label = [];
+//         let data = [];
+//         let barcolor = [];
+//         $.each(dataList, function (i, item) {
+//           const date = moment(item.Date, "MM/DD/YYYY").format("DD-MMM");
+//           label = [...label, date];
+//           data = [...data, item.percentage];
+//           barcolor = [...barcolor, item.percentage > 75
+//             ? "#26de81"
+//             : "#fc5c65"];
+//         });
+//         if (chartInstance["myChart1"]) {
+//           chartInstance["myChart1"].destroy();
+//         }
+//         chartInstance["myChart1"] = generateChart(
+//           "myChart1",
+//           "Overall Team %",
+//           label,
+//           data,
+//           barcolor
+//         );
+//       }
+//     },
+//     function (err) {
+//       console.log("err", err);
+//     }
+//   );
+// }
 
 function particularMember(from, to, team) {
   const API =
@@ -332,8 +382,8 @@ function particularMember(from, to, team) {
           label = [...label, item.Name];
           data = [...data, item.percent];
           barcolor = [...barcolor, item.percent > 75
-                    ? "#26de81"
-                    : "#fc5c65"];
+            ? "#26de81"
+            : "#fc5c65"];
         });
         if (chartInstance["myChart2"]) {
           chartInstance["myChart2"].destroy();
@@ -343,7 +393,7 @@ function particularMember(from, to, team) {
           "Team Attendance %",
           label,
           data,
-	        barcolor
+          barcolor
         );
       }
     },
@@ -355,7 +405,7 @@ function particularMember(from, to, team) {
 
 let chartInstance = {};
 
-function generateChart(id, title, label, data,barcolor) {
+function generateChart(id, title, label, data, barcolor) {
   var canvas = document.getElementById(id);
   Chart.defaults.global.defaultFontStyle = "bold";
   var _dataset = {
@@ -423,49 +473,130 @@ function dateConvert(dateparam) {
   return moment(newDt).format("YYYY-MM-DD") + "T00:00:00";
 }
 
+// Meeting Agenda
 function executeData(team, shift) {
-  const API =
-    "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FQueryTeams_S1%2FTransactions%2FXacute_MEETING_AGENDA";
-  const API_URL = ipAddress + API + contentType + externalCred;
-  const Local_URL = "./JS/dummy_data/agenta.json";
-
-  const params = {
-    "Param.1": team,
-    "Param.9": shift,
-    "Param.11": dateConvert(new Date()),
-  };
-  ajaxCall(
-    API_URL,
-    params,
-    function (result) {
-      const dataList = result.Rowsets.Rowset
-        ? result.Rowsets.Rowset[0].Row
-        : [];
-      // console.log("executeData", dataList);
-      if (dataList && dataList.length > 0) {
-        const data = dataList[0];
+  var search_word = $("#_TECHNOCRATS").val();
+  console.log("check", search_word, team, shift);
+  $.ajax({
+    type: "GET",
+    url: 'get-meeting-agenda',
+    data: {
+      'team': team,
+      'shift': shift,
+      // 'date': dateConvert(new Date()),
+    },
+    success: function (result) {
+      // alert(result[0]["team_name"]);
+      // console.log(result[0]["team_name"]);
+      if (result && result.length > 0) {
+        const data = result[0];
         // const _agenda = data.MEETING_AGENDA.replace("  ", "<br>")
-        $("#_content1").text(data.MEETING_AGENDA);
-        $("#content1").val(data.MEETING_AGENDA);
-        $("#_content2").text(data.PLAN_FOR_DAY_1);
-        $("#content2").val(data.PLAN_FOR_DAY_1);
+        $("#_content1").text(data.meeting_agenda);
+        $("#content1").val(data.meeting_agenda);
+        $("#_content2").text(data.plan_for_day_1);
+        $("#content2").val(data.plan_for_day_1);
         // $("#_content3").text(data.CODE_OF_CONDUCT);
         // $("#content3").text(data.CODE_OF_CONDUCT);
-        $("#_content4").text(data.CRITICAL_FOR_24HR);
-        $("#content4").val(data.CRITICAL_FOR_24HR);
-        $("#_content5").text(data.SBT_MDT_ESCALATION);
-        $("#content5").val(data.SBT_MDT_ESCALATION);
-        $("#_content7").text(data.DESC_FOR_STAR_OF_THE_DAY);
-        $("#content7").val(data.DESC_FOR_STAR_OF_THE_DAY);
-        $("#_content6").text(data.STAR_OF_THE_DAY);
-        $("#content6").val(data.STAR_OF_THE_DAY);
+        $("#_content4").text(data.critical_for_24hr);
+        $("#content4").val(data.critical_for_24hr);
+        $("#_content5").text(data.sbt_mdt_escalation);
+        $("#content5").val(data.sbt_mdt_escalation);
+        $("#_content7").text(data.desc_for_star_of_the_day);
+        $("#content7").val(data.desc_for_star_of_the_day);
+        $("#_content6").text(data.star_of_the_day);
+        $("#content6").val(data.star_of_the_day);
       }
-    },
-    function (err) {
-      console.log("err", err);
     }
-  );
+  });
+
 }
+
+// const API =
+//   "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FQueryTeams_S1%2FTransactions%2FXacute_MEETING_AGENDA";
+// const API_URL = ipAddress + API + contentType + externalCred;
+// const Local_URL = "./JS/dummy_data/agenta.json";
+
+// const params = {
+//   "Param.1": team,
+//   "Param.9": shift,
+//   "Param.11": dateConvert(new Date()),
+// };
+// ajaxCall(
+//   API_URL,
+//   params,
+//   function (result) {
+//     const dataList = result.Rowsets.Rowset
+//       ? result.Rowsets.Rowset[0].Row
+//       : [];
+//     // console.log("executeData", dataList);
+// if (dataList && dataList.length > 0) {
+//   const data = dataList[0];
+//   // const _agenda = data.MEETING_AGENDA.replace("  ", "<br>")
+//   $("#_content1").text(data.MEETING_AGENDA);
+//   $("#content1").val(data.MEETING_AGENDA);
+//   $("#_content2").text(data.PLAN_FOR_DAY_1);
+//   $("#content2").val(data.PLAN_FOR_DAY_1);
+//   // $("#_content3").text(data.CODE_OF_CONDUCT);
+//   // $("#content3").text(data.CODE_OF_CONDUCT);
+//   $("#_content4").text(data.CRITICAL_FOR_24HR);
+//   $("#content4").val(data.CRITICAL_FOR_24HR);
+//   $("#_content5").text(data.SBT_MDT_ESCALATION);
+//   $("#content5").val(data.SBT_MDT_ESCALATION);
+//   $("#_content7").text(data.DESC_FOR_STAR_OF_THE_DAY);
+//   $("#content7").val(data.DESC_FOR_STAR_OF_THE_DAY);
+//   $("#_content6").text(data.STAR_OF_THE_DAY);
+//   $("#content6").val(data.STAR_OF_THE_DAY);
+// }
+//     },
+//     function (err) {
+//       console.log("err", err);
+//     // }
+//   // );
+// }
+
+// function executeData(team, shift) {
+//   const API =
+//     "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FQueryTeams_S1%2FTransactions%2FXacute_MEETING_AGENDA";
+//   const API_URL = ipAddress + API + contentType + externalCred;
+//   const Local_URL = "./JS/dummy_data/agenta.json";
+
+//   const params = {
+//     "Param.1": team,
+//     "Param.9": shift,
+//     "Param.11": dateConvert(new Date()),
+//   };
+//   ajaxCall(
+//     API_URL,
+//     params,
+//     function (result) {
+//       const dataList = result.Rowsets.Rowset
+//         ? result.Rowsets.Rowset[0].Row
+//         : [];
+//       // console.log("executeData", dataList);
+//       if (dataList && dataList.length > 0) {
+//         const data = dataList[0];
+//         // const _agenda = data.MEETING_AGENDA.replace("  ", "<br>")
+//         $("#_content1").text(data.MEETING_AGENDA);
+//         $("#content1").val(data.MEETING_AGENDA);
+//         $("#_content2").text(data.PLAN_FOR_DAY_1);
+//         $("#content2").val(data.PLAN_FOR_DAY_1);
+//         // $("#_content3").text(data.CODE_OF_CONDUCT);
+//         // $("#content3").text(data.CODE_OF_CONDUCT);
+//         $("#_content4").text(data.CRITICAL_FOR_24HR);
+//         $("#content4").val(data.CRITICAL_FOR_24HR);
+//         $("#_content5").text(data.SBT_MDT_ESCALATION);
+//         $("#content5").val(data.SBT_MDT_ESCALATION);
+//         $("#_content7").text(data.DESC_FOR_STAR_OF_THE_DAY);
+//         $("#content7").val(data.DESC_FOR_STAR_OF_THE_DAY);
+//         $("#_content6").text(data.STAR_OF_THE_DAY);
+//         $("#content6").val(data.STAR_OF_THE_DAY);
+//       }
+//     },
+//     function (err) {
+//       console.log("err", err);
+//     }
+//   );
+// }
 
 function viewList() {
   $("#_viewList").modal("open");
@@ -529,7 +660,7 @@ function characters(id, event) {
   console.log("id", len);
 }
 
-function checkStatus(team, shift){
+function checkStatus(team, shift) {
   const API =
     "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionTeams%2FExecuteTeamActive";
   const API_URL = ipAddress + API + contentType + externalCred;
@@ -549,24 +680,24 @@ function checkStatus(team, shift){
       console.log("checkStatus", dataList);
       const dataC = dataList[0].Output;
       var attnBtn = true;
-      if(dataC == "Y"){
+      if (dataC == "Y") {
         memberWho(team, false);
         attnBtn = false;
-      }else if(dataC == "Z"){
+      } else if (dataC == "Z") {
         presentMember(team, shift, true);
         attnBtn = true;
-      }else if(dataC == "N"){
+      } else if (dataC == "N") {
         memberWho(team, true);
         attnBtn = true;
-      }else{
+      } else {
         attnBtn = true;
         // console.log('Attendance Entry Not Allowed');
         document.getElementById("_notA").style.display = "block";
       }
-// console.log(attnBtn)
+      // console.log(attnBtn)
       document.getElementById("attnBtn").disabled = attnBtn;
 
-      
+
     },
     function (err) {
       console.log("err", err);
@@ -596,7 +727,7 @@ function presentMember(team, shift, status) {
       if (dataList && dataList.length > 0) {
         dataList.map((x) => {
           x.id = x.TEAM_MEMBER;
-          x.ATTENDANCE = x.ATTENDANCE?x.ATTENDANCE:'A';           
+          x.ATTENDANCE = x.ATTENDANCE ? x.ATTENDANCE : 'A';
         });
         attendenceMemberwithoutSNO(dataList, status);
       } else {
@@ -610,67 +741,65 @@ function presentMember(team, shift, status) {
 }
 
 function memberWho(team, status) {
-  const API =
-    "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteMasterSelectMembers";
-  const API_URL = ipAddress + API + contentType + externalCred;
-  const Local_URL = "./JS/dummy_data/selectMember.json";
-
-  const params = {
-    "Param.1": team,
-  };
-  ajaxCall(
-    API_URL,
-    params,
-    function (result) {
-      const dataList = result.Rowsets.Rowset
-        ? result.Rowsets.Rowset[0].Row
-        : [];
-      // console.log("ajax-response", dataList);
-
-      if (dataList && dataList.length > 0) {
-        dataList.map((x) => {
-          x.id = x.TEAM_MEMBER.replace(" ", "");
-          x.ATTENDANCE = "NA";
-        });
-        attendenceMember(dataList, status);
-      } else {
-        // console.log("no data");
-      }
+  $.ajax({
+    type: "GET",
+    url: 'get-team-members',
+    data: {
+      'team': team,
     },
-    function (err) {
-      console.log("err", err);
+    success: function (result) {
+      alert(result[0]["team_name"]);
+      console.log(result[0]["team_name"]);
+      var htm = "";
+      if (result && result.length > 0) {
+        result.sort(function (a, b) {
+          return parseFloat(a.sno) - parseFloat(b.sno);
+        });
+        console.log(result);
+        if (result && result.length > 0) {
+          result.map((x) => {
+            x.id = x.team_member.replace(" ", "");
+            x.attendance = "NA";
+          });
+          attendenceMember(result, status);
+        } else {
+          console.log(memberWHO, "no data");
+        }
+      }
     }
-  );
+  });
 }
 
+
 function attendenceMember(data, status) {
+  console.log("000------", data)
   $("#attenList").empty();
   $.each(data, function (i, item) {
-    if (item.TEAM_MEMBER) {
-       console.log(item)
+    if (item.team_member) {
+      console.log("------", item)
 
       $("#attenList").append(
         `<div class="col s6 m6 radioList">
-        <h5 class="_name" title="${item.TEAM_MEMBER}">${item.TEAM_MEMBER}</h5>
+        <h5 class="_name" title="${item.team_member}">${item.team_member}</h5>
         <label class="_radio">
-          <input class="with-gap red" id="${item.SNO}_A" name="${item.TEAM_MEMBER}" type="radio" onchange="radioList(event)" />
+          <input class="with-gap red" id="${item.sno}_A" name="${item.team_member}" type="radio" onchange="radioList(event)" />
           <span>A</span>
         </label>
         <label class="_radio">
-          <input class="with-gap green" id="${item.SNO}_P" name="${item.TEAM_MEMBER}" type="radio" onchange="radioList(event)" />
+          <input class="with-gap green" id="${item.sno}_P" name="${item.team_member}" type="radio" onchange="radioList(event)" />
           <span>P</span>
         </label>
         <label class="_radio">
-          <input class="with-gap yellow" id="${item.SNO}_NA" name="${item.TEAM_MEMBER}" type="radio" onchange="radioList(event)"/>
+          <input class="with-gap yellow" id="${item.sno}_NA" name="${item.team_member}" type="radio" onchange="radioList(event)"/>
           <span>NA</span>
         </label>
       </div>`
       );
       // console.log("#"+item.SNO, status)
-      $("#" + item.SNO + "_" + item.ATTENDANCE).trigger("click");      
-      document.getElementById(item.SNO + "_A").disabled = status;
-      document.getElementById(item.SNO + "_P").disabled = status;
-      document.getElementById(item.SNO + "_NA").disabled = status;
+      $("#" + item.sno + "_" + item.attendance).trigger("click");
+      document.getElementById(item.sno + "_A").disabled = status;
+      document.getElementById(item.sno + "_P").disabled = status;
+      document.getElementById(item.sno + "_NA").disabled = status;
     }
   });
 }
@@ -678,39 +807,39 @@ function attendenceMember(data, status) {
 function attendenceMemberwithoutSNO(data, status) {
   $("#attenList").empty();
   $.each(data, function (i, item) {
-    if (item.TEAM_MEMBER) {
-       console.log(item)
+    if (item.team_member) {
+      console.log(item)
 
       $("#attenList").append(
         `<div class="col s6 m6 radioList">
-        <h5 class="_name" title="${item.TEAM_MEMBER}">${item.TEAM_MEMBER}</h5>
+        <h5 class="_name" title="${item.team_member}">${item.team_member}</h5>
         <label class="_radio">
-          <input class="with-gap red" id="${item.TEAM_MEMBER}_A" name="${item.TEAM_MEMBER}" type="radio" onchange="radioList(event)" />
+          <input class="with-gap red" id="${item.team_member}_A" name="${item.team_member}" type="radio" onchange="radioList(event)" />
           <span>A</span>
         </label>
         <label class="_radio">
-          <input class="with-gap green" id="${item.TEAM_MEMBER}_P" name="${item.TEAM_MEMBER}" type="radio" onchange="radioList(event)" />
+          <input class="with-gap green" id="${item.team_member}_P" name="${item.team_member}" type="radio" onchange="radioList(event)" />
           <span>P</span>
         </label>
         <label class="_radio">
-          <input class="with-gap yellow" id="${item.TEAM_MEMBER}_NA" name="${item.TEAM_MEMBER}" type="radio" onchange="radioList(event)"/>
+          <input class="with-gap yellow" id="${item.team_member}_NA" name="${item.team_member}" type="radio" onchange="radioList(event)"/>
           <span>NA</span>
         </label>
       </div>`
       );
       // console.log("#"+item.SNO, status)
-      $("#" + item.TEAM_MEMBER + "_" + item.ATTENDANCE).trigger("click");      
-      document.getElementById(item.TEAM_MEMBER + "_A").disabled = status;
-      document.getElementById(item.TEAM_MEMBER + "_P").disabled = status;
-      document.getElementById(item.TEAM_MEMBER + "_NA").disabled = status;
+      $("#" + item.team_member + "_" + item.attendance).trigger("click");
+      document.getElementById(item.team_member + "_A").disabled = status;
+      document.getElementById(item.team_member + "_P").disabled = status;
+      document.getElementById(item.team_member + "_NA").disabled = status;
     }
   });
 }
 
-function unique(array){
-    return array.filter(function(el,index,arr){
-        return index == arr.indexOf(el);
-    });
+function unique(array) {
+  return array.filter(function (el, index, arr) {
+    return index == arr.indexOf(el);
+  });
 }
 
 var present = [];
@@ -763,7 +892,7 @@ function saveAtten() {
         : [];
       console.log("record-response", dataList);
       checkStatus(team, shift);
-     
+
     },
     function (err) {
       console.log("err", err);

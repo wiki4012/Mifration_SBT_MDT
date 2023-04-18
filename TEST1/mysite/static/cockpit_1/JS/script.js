@@ -131,17 +131,17 @@ function memberwiseattendancereport() {
     const to = moment(dates[1], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
 
     $.ajax({
+
         type: "GET",
-        //    url: "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FQuery%2FExecuteAttenPercentage&Content-Type=text/csv",
-        url: "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTest%2FSQLSBTQuery&Content-Type=text/csv",
+        url: 'get-kpiCockpit_2',
         data: {
-            'Param.1': team,
-            'Param.2': from,
-            'Param.3': to
+            'team': team,
+            'date': moment(date).format("YYYY-MM-DD"),
+
         },
-        async: false,
-        success(data) {
-            var blob = new Blob([data], {
+        success: function (result) {
+            console.log(result)
+            var blob = new Blob([result], {
                 type: 'application/ms-excel'
             });
             var downloadUrl = URL.createObjectURL(blob);
@@ -155,6 +155,31 @@ function memberwiseattendancereport() {
             //stoploader();
         }
     });
+    // $.ajax({
+    //     type: "GET",
+    //     //    url: "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FQuery%2FExecuteAttenPercentage&Content-Type=text/csv",
+    //     url: "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTest%2FSQLSBTQuery&Content-Type=text/csv",
+    //     data: {
+    //         'Param.1': team,
+    //         'Param.2': from,
+    //         'Param.3': to
+    //     },
+    //     async: false,
+    //     success(data) {
+    //         var blob = new Blob([data], {
+    //             type: 'application/ms-excel'
+    //         });
+    //         var downloadUrl = URL.createObjectURL(blob);
+    //         var a = document.createElement("a");
+    //         a.href = downloadUrl;
+    //         a.download = "Memberwise_attendance.csv";
+    //         document.body.appendChild(a);
+    //         a.click();
+    //     },
+    //     complete: function () {
+    //         //stoploader();
+    //     }
+    // });
 }
 
 function datewiseattendancereport() {
@@ -304,7 +329,8 @@ function _lists() {
     const team = teamShift().team;
     $("#_teamName").text(team);
     sbtTeam();
-    memeberTable(team);
+    // memeberTable(team);
+    getTeamMember();
 }
 
 function teamShift() {
@@ -329,6 +355,55 @@ async function sbtTeam() {
             "<tr><td colspan='7' class='text-center'>" + "No Data" + "</td></tr>";
         $("#_sbtList tbody").html(noData);
     }
+}
+
+function getTeamMember() {
+    var search_word = $("#_team").val();
+    console.log(search_word);
+    $.ajax({
+        type: "GET",
+        url: 'get-team-members',
+        data: {
+            'team': search_word,
+        },
+        success: function (result) {
+            alert(result[0]["team_name"]);
+            console.log(result[0]["team_name"]);
+            var htm = "";
+            if (result && result.length > 0) {
+                result.sort(function (a, b) {
+                    return parseFloat(a.SNO) - parseFloat(b.SNO);
+                });
+                console.log(result);
+                $.each(result, function (i, item) {
+                    // if (item.TEAM_MEMBER) {
+                    console.log(item);
+                    var j = i + 1;
+
+                    htm +=
+                        "<tr><td>" +
+                        j +
+                        "</td><td>" +
+                        item.team_name +
+                        "</td><td>" +
+                        item.team_member +
+                        "</td><td class='_banner' onclick='memberModal(" +
+                        JSON.stringify(item) +
+                        ")'>" +
+                        "Edit" +
+                        "</td></tr>";
+                    // }
+                });
+                $("#_editTeam tbody").html(htm);
+            } else {
+                // console.log("no data for table");
+                var noData =
+                    "<tr><td colspan='4' class='text-center'>" + "No Data" + "</td></tr>";
+                $("#_editTeam tbody").html(noData);
+            }
+
+        }
+    });
 }
 
 // function sbtTeam() {
@@ -364,7 +439,7 @@ async function sbtTeam() {
 // }
 
 function SBTTable(dataList) {
-     console.log('ss', dataList)
+    console.log('ss', dataList)
     var htm = "";
     if (dataList && dataList.length > 0) {
         sbtList = dataList;
@@ -813,58 +888,58 @@ function starData() {
     }
 }
 
-function memeberTable(team) {
-    const API =
-        "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteMasterSelectMembers";
-    const API_URL = ipAddress + API + contentType + externalCred;
-    const Local_URL = "./JS/dummy_data/member.json";
+// function memeberTable(team) {
+//     const API =
+//         "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteMasterSelectMembers";
+//     const API_URL = ipAddress + API + contentType + externalCred;
+//     const Local_URL = "./JS/dummy_data/member.json";
 
-    const params = {
-        "Param.1": team,
-    };
-    // console.log('k-', API_URL)
-    ajaxCall(
-        API_URL,
-        params,
-        function (result) {
-            const dataList = result.Rowsets.Rowset ?
-                result.Rowsets.Rowset[0].Row :
-                [];
-            // console.log('sd',dataList)
-            var htm = "";
-            if (dataList && dataList.length > 0) {
-                dataList.sort(function (a, b) {
-                    return parseFloat(a.SNO) - parseFloat(b.SNO);
-                });
-                $.each(dataList, function (i, item) {
-                    // if (item.TEAM_MEMBER) {
-                    htm +=
-                        "<tr><td>" +
-                        item.SNO +
-                        "</td><td>" +
-                        item.TEAM_NAME +
-                        "</td><td>" +
-                        item.TEAM_MEMBER +
-                        "</td><td class='_banner' onclick='memberModal(" +
-                        JSON.stringify(item) +
-                        ")'>" +
-                        "Edit" +
-                        "</td></tr>";
-                    // }
-                });
-                $("#_editTeam tbody").html(htm);
-            } else {
-                // console.log("no data for table");
-                var noData =
-                    "<tr><td colspan='4' class='text-center'>" + "No Data" + "</td></tr>";
-                $("#_editTeam tbody").html(noData);
-            }
-        },
-        function (err) {
-            console.log("err", err);
-        }
-    );
-}
+//     const params = {
+//         "Param.1": team,
+//     };
+//     // console.log('k-', API_URL)
+//     ajaxCall(
+//         API_URL,
+//         params,
+//         function (result) {
+//             const dataList = result.Rowsets.Rowset ?
+//                 result.Rowsets.Rowset[0].Row :
+//                 [];
+//             // console.log('sd',dataList)
+//             var htm = "";
+//             if (dataList && dataList.length > 0) {
+//                 dataList.sort(function (a, b) {
+//                     return parseFloat(a.SNO) - parseFloat(b.SNO);
+//                 });
+//                 $.each(dataList, function (i, item) {
+//                     // if (item.TEAM_MEMBER) {
+//                     htm +=
+//                         "<tr><td>" +
+//                         item.SNO +
+//                         "</td><td>" +
+//                         item.TEAM_NAME +
+//                         "</td><td>" +
+//                         item.TEAM_MEMBER +
+//                         "</td><td class='_banner' onclick='memberModal(" +
+//                         JSON.stringify(item) +
+//                         ")'>" +
+//                         "Edit" +
+//                         "</td></tr>";
+//                     // }
+//                 });
+//                 $("#_editTeam tbody").html(htm);
+//             } else {
+//                 // console.log("no data for table");
+//                 var noData =
+//                     "<tr><td colspan='4' class='text-center'>" + "No Data" + "</td></tr>";
+//                 $("#_editTeam tbody").html(noData);
+//             }
+//         },
+//         function (err) {
+//             console.log("err", err);
+//         }
+//     );
+// }
 
 function memberModal(data) {
     // console.log(data)

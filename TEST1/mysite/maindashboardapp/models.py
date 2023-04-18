@@ -1,6 +1,8 @@
+from django.conf import UserSettingsHolder
 from django.db import models
 
 # Create your models here.
+
 
 class ZkpiManualDate(models.Model):
     mannual_kpi_id = models.BigAutoField(primary_key=True)
@@ -53,7 +55,9 @@ class ZsbtCaPa(models.Model):
     capa = models.CharField(max_length=2000, blank=True, null=True)
     what = models.CharField(max_length=2000, blank=True, null=True)
     who = models.CharField(max_length=2000, blank=True, null=True)
-    when_field = models.CharField(db_column='when_', max_length=2000, blank=True, null=True)  # Field renamed because it ended with '_'.
+    # Field renamed because it ended with '_'.
+    when_field = models.CharField(
+        db_column='when_', max_length=2000, blank=True, null=True)
     status = models.CharField(max_length=2000, blank=True, null=True)
 
     class Meta:
@@ -101,22 +105,27 @@ class ZsbtCapaRecordsMaster(models.Model):
     kpihiton = models.DateTimeField(blank=True, null=True)
     date_allocation = models.DateTimeField(blank=True, null=True)
     date_submission = models.DateTimeField(blank=True, null=True)
-    participants_names = models.CharField(max_length=400, blank=True, null=True)
+    participants_names = models.CharField(
+        max_length=400, blank=True, null=True)
     what = models.CharField(max_length=800, blank=True, null=True)
     where_s1 = models.CharField(max_length=800, blank=True, null=True)
     when_s1 = models.CharField(max_length=800, blank=True, null=True)
     who = models.CharField(max_length=800, blank=True, null=True)
     why = models.CharField(max_length=800, blank=True, null=True)
     howbig = models.CharField(max_length=800, blank=True, null=True)
-    evidance_links = models.TextField(blank=True, null=True)  # This field type is a guess.
+    # This field type is a guess.
+    evidance_links = models.TextField(blank=True, null=True)
     correction = models.CharField(max_length=600, blank=True, null=True)
     analyse_man = models.CharField(max_length=400, blank=True, null=True)
     analyse_method = models.CharField(max_length=400, blank=True, null=True)
-    analyse_measurement = models.CharField(max_length=400, blank=True, null=True)
+    analyse_measurement = models.CharField(
+        max_length=400, blank=True, null=True)
     analyse_machine = models.CharField(max_length=400, blank=True, null=True)
     analyse_material = models.CharField(max_length=400, blank=True, null=True)
-    analyse_enviornment = models.CharField(max_length=400, blank=True, null=True)
-    brainstorming_tool = models.CharField(max_length=400, blank=True, null=True)
+    analyse_enviornment = models.CharField(
+        max_length=400, blank=True, null=True)
+    brainstorming_tool = models.CharField(
+        max_length=400, blank=True, null=True)
     problem = models.CharField(max_length=400, blank=True, null=True)
     make_it_stick = models.CharField(max_length=400, blank=True, null=True)
     pm_schedule = models.CharField(max_length=400, blank=True, null=True)
@@ -191,7 +200,8 @@ class ZsbtMdtEscalations(models.Model):
     team_name = models.CharField(max_length=400, blank=True, null=True)
     escalation_date = models.DateTimeField(blank=True, null=True)
     shift = models.CharField(max_length=20, blank=True, null=True)
-    sbt_mdt_escalation = models.CharField(max_length=600, blank=True, null=True)
+    sbt_mdt_escalation = models.CharField(
+        max_length=600, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -201,12 +211,15 @@ class ZsbtMdtEscalations(models.Model):
 class ZsbtMeetingAgendaTable(models.Model):
     agenda_id = models.BigAutoField(primary_key=True)
     code_of_conduct = models.CharField(max_length=2000, blank=True, null=True)
-    critical_for_24hr = models.CharField(max_length=2000, blank=True, null=True)
+    critical_for_24hr = models.CharField(
+        max_length=2000, blank=True, null=True)
     agenda_date = models.DateTimeField(blank=True, null=True)
-    desc_for_star_of_the_day = models.CharField(max_length=2000, blank=True, null=True)
+    desc_for_star_of_the_day = models.CharField(
+        max_length=2000, blank=True, null=True)
     meeting_agenda = models.CharField(max_length=2000, blank=True, null=True)
     plan_for_day_1 = models.CharField(max_length=2000, blank=True, null=True)
-    sbt_mdt_escalation = models.CharField(max_length=2000, blank=True, null=True)
+    sbt_mdt_escalation = models.CharField(
+        max_length=2000, blank=True, null=True)
     shift = models.CharField(max_length=20, blank=True, null=True)
     star_of_the_day = models.CharField(max_length=2000, blank=True, null=True)
     team_name = models.CharField(max_length=400, blank=True, null=True)
@@ -275,3 +288,5 @@ class ZsbtTriggerHitCases(models.Model):
     class Meta:
         managed = False
         db_table = 'zsbt_trigger_hit_cases'
+
+

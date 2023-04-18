@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = function () {
     selectTechno();
 
     //On Load Animation
@@ -16,78 +16,29 @@ async function selectTechno() {
     console.warn(result);
     var htm = "";
     if (result && result.length > 0) {
-      $.each(result, function (i, item) {
-        htm +=
-          "<option value='" +
-          item.team_name +
-          "'>" +
-          item.team_name +
-          "</option>";
-      });
-      $("#_TECHNOCRATS").append(htm);
+        $.each(result, function (i, item) {
+            htm +=
+                "<option value='" +
+                item.team_name +
+                "'>" +
+                item.team_name +
+                "</option>";
+        });
+        $("#_TECHNOCRATS").append(htm);
     }
-  }
+}
 
-// function selectTechno() {
-//     const API =
-//         "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteMasterTeam";
-//     const API_URL = ipAddress + API + contentType + externalCred;
-//     const Local_URL = "./JS/dummy_data/team.json";
-
-//     const params = {};
-//     ajaxCall(
-//         API_URL,
-//         params,
-//         function(result) {
-//             // $("#_TECHNOCRATS").empty();
-//             $("#_TECHNOCRATS").append(
-//                 "<option value='' disabled>Select Team</option>"
-//             );
-//             const dataList = result.Rowsets.Rowset ?
-//                 result.Rowsets.Rowset[0].Row : [];
-//             // console.log("ajax-response", dataList);
-//             var htm = "";
-//             if (dataList && dataList.length > 0) {
-//                 $.each(dataList, function(i, item) {
-//                     htm +=
-//                         "<option value='" +
-//                         item.TEAM_NAME +
-//                         "'>" +
-//                         item.TEAM_NAME +
-//                         "</option>";
-//                 });
-//                 $("#_TECHNOCRATS").append(htm);
-//                 const pantV = {
-//                     value: dataList[0].TEAM_NAME,
-//                 };
-//                 listChart(pantV);
-//             } else {
-//                 // console.log("no data");
-
-//                 $("#plant").append(
-//                     "<option value='' selected disabled>Select Plant</option> <option value='' disabled>No Data</option>"
-//                 );
-//             }
-//         },
-//         function(err) {
-//             console.log("err", err);
-//             $("#plant").append(
-//                 "<option value='' selected disabled>Select Plant</option> <option value='' disabled>No Data</option>"
-//             );
-//         }
-//     );
-// }
 
 function listChart(data) {
     const team = data.value;
     $("#_team").text(team);
-    Chart.helpers.each(Chart.instances, function(instance) {
+    Chart.helpers.each(Chart.instances, function (instance) {
         instance.destroy();
     });
     chartList(team);
 }
 
-setInterval(function() {
+setInterval(function () {
     const team = $("#_TECHNOCRATS").val();
     $("#_team").text(team);
     chartList(team);
@@ -99,264 +50,405 @@ function star() {
 }
 
 function chartList(teamName) {
-    const API =
-        "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FQuery%2FTRIGGER_LOGIC%2FGET_OPERATIONS%2FQRY%2FSELECT_MONTHLY_TRIGGER_TARGET_V1";
-    const API_URL = ipAddress + API + contentType + externalCred;
-    const Local_URL = "./JS/dummy_data/triggerTarget.json";
+    // const API =
+    //     "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FQuery%2FTRIGGER_LOGIC%2FGET_OPERATIONS%2FQRY%2FSELECT_MONTHLY_TRIGGER_TARGET_V1";
+    // const API_URL = ipAddress + API + contentType + externalCred;
+    // const Local_URL = "./JS/dummy_data/triggerTarget.json";
 
-    const params = {
-        "Param.1": teamName,
-    };
+    // const params = {
+    //     "Param.1": teamName,
+    // };
 
     var charts = [];
 
-    ajaxCall(
-        API_URL,
-        params,
-        function(result) {
-            const dataList = result.Rowsets.Rowset ?
-                result.Rowsets.Rowset[0].Row : [];
-            // console.log("ajax-trigger", dataList);
-            if (dataList && dataList.length > 0) {
-                $.each(dataList, function(i, item) {
-                    let index = charts.findIndex((x) => x.GRAPH_ID === item.GRAPH_ID);
-                    if (index > -1) {
-                        charts[index].LOWER.push(item.LOWER_LIMIT);
-                        charts[index].UPPER.push(item.UPPER_LIMIT);
-                        if (charts[index].LOWER_LEGEND.length > 0) {
-                            ((charts[index].LOWER_LEGEND[charts[index].LOWER_LEGEND.length - 1] != item.LOWER_LIMIT) ? charts[index].LOWER_LEGEND.push(item.LOWER_LIMIT) : '');
-                            ((charts[index].UPPER_LEGEND[charts[index].UPPER_LEGEND.length - 1] != item.UPPER_LIMIT) ? charts[index].UPPER_LEGEND.push(item.UPPER_LIMIT) : '');
-                        }
-                    } else {
-                        item.LOWER = [];
-                        item.UPPER = [];
-                        item.LOWER = [];
-                        item.date = [];
-                        item.value = [];
-                        item.barColor = [];
-                        item.borderColor = [];
-                        item.LOWER.push(item.LOWER_LIMIT);
-                        item.UPPER.push(item.UPPER_LIMIT);
-                        item.LOWER_LEGEND = [];
-                        item.UPPER_LEGEND = [];
-                        item.LOWER_LEGEND.push(item.LOWER_LIMIT);
-                        item.UPPER_LEGEND.push(item.UPPER_LIMIT);
-                        charts = [...charts, item];
-                    }
-                    console.log(item.VALUE + "-----" + item.UPPER_LIMIT);
-
-                });
-                console.log("ajax-charts", charts);
-            }
-            if (dataList && dataList.length > 0) {
-                $.each(dataList, function(i, item) {
-                    let index = charts.findIndex((x) => parseInt(x.GRAPH_ID) === parseInt(item.GRAPH_ID));
-                    if (index > -1) {
-                        // console.log('index',  charts[index].barColor)
-                        // charts[index].date.push(
-                        //   moment(item.DATE, "MM/DD/YYYY").format("DD MMM")
-                        // );
-                        charts[index].date.push(
-                            monthsList(item.MONTH_VAL) + "," + item.YEAR_VAL
-                        );
-                        charts[index].value.push(item.VALUE);
-                        // charts[index].LOWER_LIMIT
-                        //   ? charts[index].LOWER.push(charts[index].LOWER_LIMIT)
-                        //   : "";
-                        charts[index].UPPER_LIMIT ?
-                            charts[index].UPPER.push(charts[index].UPPER_LIMIT) :
-                            "";
-                        if (parseFloat(charts[index].LOWER_LIMIT) > parseFloat(charts[index].UPPER_LIMIT)) {
-                            const colorCode =
-                                item.VALUE > parseFloat(item.UPPER_LIMIT) ?
-                                "rgba(179, 57, 57, 0.2)" :
-                                "rgba(33, 140, 116,0.2)";
-                            charts[index].barColor ?
-                                charts[index].barColor.push(colorCode) :
-                                "";
-                            const bordercode =
-                                item.VALUE > parseFloat(item.UPPER_LIMIT) ?
-                                "rgba(179, 57, 57, 1)" :
-                                "rgba(33, 140, 116,1)";
-                            charts[index].barColor ?
-                                charts[index].borderColor.push(bordercode) :
-                                "";
-                        } else {
-                            const colorCode =
-                                item.VALUE < parseFloat(item.UPPER_LIMIT) ?
-                                "rgba(179, 57, 57, 0.2)" :
-                                "rgba(33, 140, 116,0.2)";
-                            charts[index].barColor ?
-                                charts[index].barColor.push(colorCode) :
-                                "";
-                            const bordercode =
-                                item.VALUE < parseFloat(item.UPPER_LIMIT) ?
-                                "rgba(179, 57, 57, 1)" :
-                                "rgba(33, 140, 116,1)";
-                            charts[index].barColor ?
-                                charts[index].borderColor.push(bordercode) :
-                                "";
-                        }
-
-                    } else {
-                        item.date = [];
-                        item.value = [];
-                        item.date.push(
-                            monthsList(item.MONTH_VAL) + "," + item.YEAR_VAL
-                        );
-                        item.value.push(parseFloat(item.VALUE));
-
-                        charts = [...charts, item];
-                    }
-                });
-                console.log("Abby", charts);
-            }
-
-            //    const API =
-            //      "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FNEW_KPI_LOGIC%2FTRANSACTIONS%2FXACUTE_MONTHLY_SELECT";
-            // const API_URL = ipAddress + API + contentType + externalCred;
-            // const Local_URL = "./JS/dummy_data/graphValue.json";
-
-            // const params = {
-            //    "Param.1": teamName,
-            //  };
-            //  ajaxCall(
-            //    API_URL,
-            //   params,
-            //  function(result) {
-            //    const dataList = result.Rowsets.Rowset ?
-            //      result.Rowsets.Rowset[0].Row : [];
-            // console.log("ajax-graphValue", charts);
-
-            // if (dataList && dataList.length > 0) {
-            //     $.each(dataList, function(i, item) {
-            //         let index = charts.findIndex((x) => parseInt(x.GRAPH_ID) === parseInt(item.GRAPH_ID));
-            //         if (index > -1) {
-            //             // console.log('index',  charts[index].barColor)
-            //             // charts[index].date.push(
-            //             //   moment(item.DATE, "MM/DD/YYYY").format("DD MMM")
-            //             // );
-            //             charts[index].date.push(
-            //                 monthsList(item.MONTH_VAL) + "," + item.YEAR_VAL
-            //             );
-            //             charts[index].value.push(item.VALUE);
-            //             // charts[index].LOWER_LIMIT
-            //             //   ? charts[index].LOWER.push(charts[index].LOWER_LIMIT)
-            //             //   : "";
-            //             charts[index].UPPER_LIMIT ?
-            //                 charts[index].UPPER.push(charts[index].UPPER_LIMIT) :
-            //                 "";
-            //            // if (parseFloat(charts[index].LOWER_LIMIT) > parseFloat(charts[index].UPPER_LIMIT)) {
-            //                 const colorCode =
-            //                     item.VALUE > parseFloat(charts[index].UPPER_LIMIT) ?
-            //                     "rgba(179, 57, 57, 0.2)" :
-            //                     "rgba(33, 140, 116,0.2)";
-            //                 charts[index].barColor ?
-            //                     charts[index].barColor.push(colorCode) :
-            //                     "";
-            //                 const bordercode =
-            //                     item.VALUE > parseFloat(charts[index].UPPER_LIMIT) ?
-            //                     "rgba(179, 57, 57, 1)" :
-            //                     "rgba(33, 140, 116,1)";
-            //                 charts[index].barColor ?
-            //                     charts[index].borderColor.push(bordercode) :
-            //                     "";
-            //             // } else {
-            //             //     const colorCode =
-            //             //         item.VALUE < parseFloat(charts[index].UPPER_LIMIT) ?
-            //             //         "rgba(179, 57, 57, 0.2)" :
-            //             //         "rgba(33, 140, 116,0.2)";
-            //             //     charts[index].barColor ?
-            //             //         charts[index].barColor.push(colorCode) :
-            //             //         "";
-            //             //     const bordercode =
-            //             //         item.VALUE < parseFloat(charts[index].UPPER_LIMIT) ?
-            //             //         "rgba(179, 57, 57, 1)" :
-            //             //         "rgba(33, 140, 116,1)";
-            //             //     charts[index].barColor ?
-            //             //         charts[index].borderColor.push(bordercode) :
-            //             //         "";
-            //             // }
-
-            //         } else {
-            //             item.date = [];
-            //             item.value = [];
-            //             item.date.push(
-            //                 monthsList(item.MONTH_VAL) + "," + item.YEAR_VAL
-            //             );
-            //             item.value.push(parseFloat(item.VALUE));
-
-            //             charts = [...charts, item];
-            //         }
-            //     });
-            //     console.log("Abby", charts);
-            // }
-
-            //console.log("ajax-charts", charts);
-            if (charts && charts.length > 0) {
-                $.each(charts, function(index, item) {
-                    if (index < 20) {
-                        const _list = {
-                            title: item.KPI,
-                            labels: item.date,
-                            yAxes: item.UNITFORYAXIS,
-                            dataSets: [
-                                // {
-                                //   label: "Trigger-" + Math.round(item.LOWER_LEGEND),
-                                //   type: "line",
-                                //   data: item.LOWER,
-                                //   borderColor: "#DA4121",
-                                //   backgroundColor: "#DA4121",
-                                //   borderWidth: 1,
-                                //   lineTension: 0,
-                                //   fill: false,
-                                //   datalabels: {
-                                //     display: false,
-                                //   },
-                                // },
-                                {
-                                    label: "Target-" + item.UPPER_LEGEND,
-                                    type: "line",
-                                    data: item.UPPER,
-                                    borderColor: "#7d5fff",
-                                    backgroundColor: "#7d5fff",
-                                    borderWidth: 0.5,
-                                    lineTension: 0,
-                                    steppedLine: true,
-                                    fill: false,
-                                    datalabels: {
-                                        display: false,
-                                    },
-                                },
-                                {
-                                    label: "Bar",
-                                    type: "bar",
-                                    data: item.value,
-                                    borderColor: item.borderColor, //"#3498db",
-                                    backgroundColor: item.barColor, //"#3498db",
-                                    borderWidth: 1,
-                                    lineTension: 0,
-                                    fill: false,
-                                },
-                            ],
-                        };
-                        if (chartInstances["myChart" + item.GRAPH_ID]) {
-                            chartInstances["myChart" + item.GRAPH_ID].destroy();
-                        }
-                        chartInstances["myChart" + item.GRAPH_ID] = generateChart(
-                            "myChart" + item.GRAPH_ID,
-                            _list
-                        );
-                    }
-                });
-            }
+    $.ajax({
+        type: "GET",
+        url: 'get-KpiMonthlyKpi',
+        data: {
+            'team': teamName,
         },
-        function(err) {
-            console.log("err", err);
-        }
-    );
+        success: function (result) {
+            console.log(result);
+            if (result && result.length > 0) {
+                $.each(result, function (i, item) {
+                    var toDt = new Date(item.kpi_date);
+                    var ttMon = toDt.getMonth();
+                    var ttYear = toDt.getFullYear();
+                    // console.log(fromMon,fromYear);
+                    $.ajax({
 
+                        type: "GET",
+                        url: 'get-TTMonthlyKpi',
+                        data: {
+                            'team': teamName,
+                            'graphId': item.graph_id,
+                            'ttMon': ttMon,
+                            'ttYear': ttYear,
+                        },
+                        success: function (result1) {
+                            if (result1 && result1.length > 0) {
+                                $.each(result1, function (i, item) {
+                                    console.log("inner",result1);
+                                    let index = charts.findIndex((x) => x.graph_id === item.graph_id);
+                                    item.LOWER = [];
+                                        item.UPPER = [];
+                                        item.LOWER = [];
+                                        item.date = [];
+                                        item.value = [];
+                                        item.barColor = [];
+                                        item.borderColor = [];
+                                        item.LOWER.push(item.lower_limit_w2);
+                                        item.UPPER.push(item.upper_limit_w2);
+                                        item.LOWER_LEGEND = [];
+                                        item.UPPER_LEGEND = [];
+                                        item.LOWER_LEGEND.push(item.lower_limit_w2);
+                                        item.UPPER_LEGEND.push(item.upper_limit_w2);
+                                        charts = [...charts, item];
+                                    if (index > -1) {
+                                        console.log(index);
+                                        charts[index].LOWER.push(item.lower_limit_w2);
+                                        charts[index].UPPER.push(item.upper_limit_w2);
+                                        if (charts[index].LOWER_LEGEND.length > 0) {
+                                            ((charts[index].LOWER_LEGEND[charts[index].LOWER_LEGEND.length - 1] != item.lower_limit_w2) ? charts[index].LOWER_LEGEND.push(item.lower_limit_w2) : '');
+                                            ((charts[index].UPPER_LEGEND[charts[index].UPPER_LEGEND.length - 1] != item.upper_limit_w2) ? charts[index].UPPER_LEGEND.push(item.upper_limit_w2) : '');
+                                        }
+                                    }
+                                    //  else {
+                                    //     item.LOWER = [];
+                                    //     item.UPPER = [];
+                                    //     item.LOWER = [];
+                                    //     item.date = [];
+                                    //     item.value = [];
+                                    //     item.barColor = [];
+                                    //     item.borderColor = [];
+                                    //     item.LOWER.push(item.lower_limit_w2);
+                                    //     item.UPPER.push(item.upper_limit_w2);
+                                    //     item.LOWER_LEGEND = [];
+                                    //     item.UPPER_LEGEND = [];
+                                    //     item.LOWER_LEGEND.push(item.lower_limit_w2);
+                                    //     item.UPPER_LEGEND.push(item.upper_limit_w2);
+                                    //     charts = [...charts, item];
+                                    // }
+                                    console.log(item.kpi_value + "-----" + item.upper_limit_w2);
+                                    // console.log("inner", result);
+
+
+                                });
+                                console.log("result1",result1);
+                            }
+                        }
+                        // let index = charts.findIndex((x) => x.graph_id === item.graph_id);
+                        // if (index > -1) {
+                        //     charts[index].LOWER.push(item.lower_limit_w2);
+                        //     charts[index].UPPER.push(item.upper_limit_w2);
+                        //     if (charts[index].LOWER_LEGEND.length > 0) {
+                        //         ((charts[index].LOWER_LEGEND[charts[index].LOWER_LEGEND.length - 1] != item.lower_limit_w2) ? charts[index].LOWER_LEGEND.push(item.lower_limit_w2) : '');
+                        //         ((charts[index].UPPER_LEGEND[charts[index].UPPER_LEGEND.length - 1] != item.upper_limit_w2) ? charts[index].UPPER_LEGEND.push(item.upper_limit_w2) : '');
+                        //     }
+                        // } else {
+                        //     item.LOWER = [];
+                        //     item.UPPER = [];
+                        //     item.LOWER = [];
+                        //     item.date = [];
+                        //     item.value = [];
+                        //     item.barColor = [];
+                        //     item.borderColor = [];
+                        //     item.LOWER.push(item.lower_limit_w2);
+                        //     item.UPPER.push(item.upper_limit_w2);
+                        //     item.LOWER_LEGEND = [];
+                        //     item.UPPER_LEGEND = [];
+                        //     item.LOWER_LEGEND.push(item.lower_limit_w2);
+                        //     item.UPPER_LEGEND.push(item.upper_limit_w2);
+                        //     charts = [...charts, item];
+                        // }
+                        // console.log(item.kpi_value + "-----" + item.upper_limit_w2);
+
+                    });
+                    console.log("ajax-charts", charts);
+
+                    if (result && result.length > 0) {
+                        $.each(result, function (i, item) {
+                            let index = charts.findIndex((x) => parseInt(x.graph_id) === parseInt(item.graph_id));
+                            if (index > -1) {
+                                // console.log('index',  charts[index].barColor)
+                                // charts[index].date.push(
+                                //   moment(item.DATE, "MM/DD/YYYY").format("DD MMM")
+                                // );
+                                charts[index].date.push(
+                                    monthsList(ttMon) + "," + ttYear
+                                );
+                                charts[index].value.push(item.kpi_value);
+                                // charts[index].LOWER_LIMIT
+                                //   ? charts[index].LOWER.push(charts[index].LOWER_LIMIT)
+                                //   : "";
+                                charts[index].upper_limit_w2 ?
+                                    charts[index].UPPER.push(charts[index].upper_limit_w2) :
+                                    "";
+                                if (parseFloat(charts[index].lower_limit_w2) > parseFloat(charts[index].upper_limit_w2)) {
+                                    const colorCode =
+                                        item.kpi_value > parseFloat(item.upper_limit_w2) ?
+                                            "rgba(179, 57, 57, 0.2)" :
+                                            "rgba(33, 140, 116,0.2)";
+                                    charts[index].barColor ?
+                                        charts[index].barColor.push(colorCode) :
+                                        "";
+                                    const bordercode =
+                                        item.kpi_value > parseFloat(item.upper_limit_w2) ?
+                                            "rgba(179, 57, 57, 1)" :
+                                            "rgba(33, 140, 116,1)";
+                                    charts[index].barColor ?
+                                        charts[index].borderColor.push(bordercode) :
+                                        "";
+                                } else {
+                                    const colorCode =
+                                        item.kpi_value < parseFloat(item.upper_limit_w2) ?
+                                            "rgba(179, 57, 57, 0.2)" :
+                                            "rgba(33, 140, 116,0.2)";
+                                    charts[index].barColor ?
+                                        charts[index].barColor.push(colorCode) :
+                                        "";
+                                    const bordercode =
+                                        item.kpi_value < parseFloat(item.upper_limit_w2) ?
+                                            "rgba(179, 57, 57, 1)" :
+                                            "rgba(33, 140, 116,1)";
+                                    charts[index].barColor ?
+                                        charts[index].borderColor.push(bordercode) :
+                                        "";
+                                }
+
+                            } else {
+                                item.date = [];
+                                item.value = [];
+                                item.date.push(
+                                    monthsList(ttMon) + "," + ttYear
+                                );
+                                item.value.push(parseFloat(item.kpi_value));
+
+                                charts = [...charts, item];
+                            }
+                        });
+                        console.log("Abby", charts);
+                    }
+
+
+                    if (charts && charts.length > 0) {
+                        $.each(charts, function (index, item) {
+                            if (index < 20) {
+                                const _list = {
+                                    title: item.KPI,
+                                    labels: item.date,
+                                    yAxes: item.UNITFORYAXIS,
+                                    dataSets: [
+
+                                        {
+                                            label: "Target-" + item.UPPER_LEGEND,
+                                            type: "line",
+                                            data: item.UPPER,
+                                            borderColor: "#7d5fff",
+                                            backgroundColor: "#7d5fff",
+                                            borderWidth: 0.5,
+                                            lineTension: 0,
+                                            steppedLine: true,
+                                            fill: false,
+                                            datalabels: {
+                                                display: false,
+                                            },
+                                        },
+                                        {
+                                            label: "Bar",
+                                            type: "bar",
+                                            data: item.value,
+                                            borderColor: item.borderColor, //"#3498db",
+                                            backgroundColor: item.barColor, //"#3498db",
+                                            borderWidth: 1,
+                                            lineTension: 0,
+                                            fill: false,
+                                        },
+                                    ],
+                                };
+                                if (chartInstances["myChart" + item.GRAPH_ID]) {
+                                    chartInstances["myChart" + item.GRAPH_ID].destroy();
+                                }
+                                chartInstances["myChart" + item.GRAPH_ID] = generateChart(
+                                    "myChart" + item.GRAPH_ID,
+                                    _list
+                                );
+                            }
+                        });
+                    }
+                });
+            }
+
+        }
+    });
 }
+// ajaxCall(
+//     API_URL,
+//     params,
+//     function (result) {
+//         const dataList = result.Rowsets.Rowset ?
+//             result.Rowsets.Rowset[0].Row : [];
+//         // console.log("ajax-trigger", dataList);
+//         if (dataList && dataList.length > 0) {
+//             $.each(dataList, function (i, item) {
+//                 let index = charts.findIndex((x) => x.GRAPH_ID === item.GRAPH_ID);
+//                 if (index > -1) {
+//                     charts[index].LOWER.push(item.LOWER_LIMIT);
+//                     charts[index].UPPER.push(item.UPPER_LIMIT);
+//                     if (charts[index].LOWER_LEGEND.length > 0) {
+//                         ((charts[index].LOWER_LEGEND[charts[index].LOWER_LEGEND.length - 1] != item.LOWER_LIMIT) ? charts[index].LOWER_LEGEND.push(item.LOWER_LIMIT) : '');
+//                         ((charts[index].UPPER_LEGEND[charts[index].UPPER_LEGEND.length - 1] != item.UPPER_LIMIT) ? charts[index].UPPER_LEGEND.push(item.UPPER_LIMIT) : '');
+//                     }
+//                 } else {
+//                     item.LOWER = [];
+//                     item.UPPER = [];
+//                     item.LOWER = [];
+//                     item.date = [];
+//                     item.value = [];
+//                     item.barColor = [];
+//                     item.borderColor = [];
+//                     item.LOWER.push(item.LOWER_LIMIT);
+//                     item.UPPER.push(item.UPPER_LIMIT);
+//                     item.LOWER_LEGEND = [];
+//                     item.UPPER_LEGEND = [];
+//                     item.LOWER_LEGEND.push(item.LOWER_LIMIT);
+//                     item.UPPER_LEGEND.push(item.UPPER_LIMIT);
+//                     charts = [...charts, item];
+//                 }
+//                 console.log(item.VALUE + "-----" + item.UPPER_LIMIT);
+
+//             });
+//             console.log("ajax-charts", charts);
+//         }
+//         if (dataList && dataList.length > 0) {
+//             $.each(dataList, function (i, item) {
+//                 let index = charts.findIndex((x) => parseInt(x.GRAPH_ID) === parseInt(item.GRAPH_ID));
+//                 if (index > -1) {
+//                     // console.log('index',  charts[index].barColor)
+//                     // charts[index].date.push(
+//                     //   moment(item.DATE, "MM/DD/YYYY").format("DD MMM")
+//                     // );
+//                     charts[index].date.push(
+//                         monthsList(item.MONTH_VAL) + "," + item.YEAR_VAL
+//                     );
+//                     charts[index].value.push(item.VALUE);
+//                     // charts[index].LOWER_LIMIT
+//                     //   ? charts[index].LOWER.push(charts[index].LOWER_LIMIT)
+//                     //   : "";
+//                     charts[index].UPPER_LIMIT ?
+//                         charts[index].UPPER.push(charts[index].UPPER_LIMIT) :
+//                         "";
+//                     if (parseFloat(charts[index].LOWER_LIMIT) > parseFloat(charts[index].UPPER_LIMIT)) {
+//                         const colorCode =
+//                             item.VALUE > parseFloat(item.UPPER_LIMIT) ?
+//                                 "rgba(179, 57, 57, 0.2)" :
+//                                 "rgba(33, 140, 116,0.2)";
+//                         charts[index].barColor ?
+//                             charts[index].barColor.push(colorCode) :
+//                             "";
+//                         const bordercode =
+//                             item.VALUE > parseFloat(item.UPPER_LIMIT) ?
+//                                 "rgba(179, 57, 57, 1)" :
+//                                 "rgba(33, 140, 116,1)";
+//                         charts[index].barColor ?
+//                             charts[index].borderColor.push(bordercode) :
+//                             "";
+//                     } else {
+//                         const colorCode =
+//                             item.VALUE < parseFloat(item.UPPER_LIMIT) ?
+//                                 "rgba(179, 57, 57, 0.2)" :
+//                                 "rgba(33, 140, 116,0.2)";
+//                         charts[index].barColor ?
+//                             charts[index].barColor.push(colorCode) :
+//                             "";
+//                         const bordercode =
+//                             item.VALUE < parseFloat(item.UPPER_LIMIT) ?
+//                                 "rgba(179, 57, 57, 1)" :
+//                                 "rgba(33, 140, 116,1)";
+//                         charts[index].barColor ?
+//                             charts[index].borderColor.push(bordercode) :
+//                             "";
+//                     }
+
+//                 } else {
+//                     item.date = [];
+//                     item.value = [];
+//                     item.date.push(
+//                         monthsList(item.MONTH_VAL) + "," + item.YEAR_VAL
+//                     );
+//                     item.value.push(parseFloat(item.VALUE));
+
+//                     charts = [...charts, item];
+//                 }
+//             });
+//             console.log("Abby", charts);
+//         }
+
+
+//         if (charts && charts.length > 0) {
+//             $.each(charts, function (index, item) {
+//                 if (index < 20) {
+//                     const _list = {
+//                         title: item.KPI,
+//                         labels: item.date,
+//                         yAxes: item.UNITFORYAXIS,
+//                         dataSets: [
+//                             // {
+//                             //   label: "Trigger-" + Math.round(item.LOWER_LEGEND),
+//                             //   type: "line",
+//                             //   data: item.LOWER,
+//                             //   borderColor: "#DA4121",
+//                             //   backgroundColor: "#DA4121",
+//                             //   borderWidth: 1,
+//                             //   lineTension: 0,
+//                             //   fill: false,
+//                             //   datalabels: {
+//                             //     display: false,
+//                             //   },
+//                             // },
+//                             {
+//                                 label: "Target-" + item.UPPER_LEGEND,
+//                                 type: "line",
+//                                 data: item.UPPER,
+//                                 borderColor: "#7d5fff",
+//                                 backgroundColor: "#7d5fff",
+//                                 borderWidth: 0.5,
+//                                 lineTension: 0,
+//                                 steppedLine: true,
+//                                 fill: false,
+//                                 datalabels: {
+//                                     display: false,
+//                                 },
+//                             },
+//                             {
+//                                 label: "Bar",
+//                                 type: "bar",
+//                                 data: item.value,
+//                                 borderColor: item.borderColor, //"#3498db",
+//                                 backgroundColor: item.barColor, //"#3498db",
+//                                 borderWidth: 1,
+//                                 lineTension: 0,
+//                                 fill: false,
+//                             },
+//                         ],
+//                     };
+//                     if (chartInstances["myChart" + item.GRAPH_ID]) {
+//                         chartInstances["myChart" + item.GRAPH_ID].destroy();
+//                     }
+//                     chartInstances["myChart" + item.GRAPH_ID] = generateChart(
+//                         "myChart" + item.GRAPH_ID,
+//                         _list
+//                     );
+//                 }
+//             });
+//         }
+//     },
+//     function (err) {
+//         console.log("err", err);
+//     }
+// );
+
+
 
 function monthsList(val) {
     var months = [
@@ -425,7 +517,7 @@ function generateChart(id, list) {
                     // opacity:0,
                     // anchor: 'end',
                     // align: 'top',
-                    backgroundColor: function(context) {
+                    backgroundColor: function (context) {
                         // console.log('s', context)
                         return context.dataset.backgroundColor;
                     },
@@ -462,7 +554,7 @@ function generateChart(id, list) {
                     ticks: {
                         fontSize: 16,
                     },
-                }, ],
+                },],
                 yAxes: [{
                     position: "left",
                     ticks: {
@@ -474,7 +566,7 @@ function generateChart(id, list) {
                         display: true,
                         labelString: list.yAxes,
                     },
-                }, ],
+                },],
             },
             responsive: true,
         },
@@ -490,7 +582,7 @@ function viewList(id) {
 
 function slideChange(id) {
     // console.log('sdf', id)
-    document.querySelectorAll("._type").forEach(function(element, index) {
+    document.querySelectorAll("._type").forEach(function (element, index) {
         element.classList.remove("active");
     });
     $("#_myChart" + id).addClass("active");
@@ -501,102 +593,10 @@ function ajaxCall(url, params, callback, error) {
         type: "GET",
         url: url,
         dataType: "json",
-        data: {...params },
+        data: { ...params },
         success: callback,
         error: error,
     });
 }
 
 
-
-function starload() {
-    console.log("-----------------tttttttttttttteeeeeeeeeeeaaaaaaaaaam" + teamName);
-    starUpload(teamName);
-}
-
-function star() {
-    console.log("-----------------tttttttttttttteeeeeeeeeeeaaaaaaaaaam" + teamName);
-    starUpload(teamName);
-}
-
-
-function starUpload(data) {
-    $("#_uploadStar").modal("open");
-    $("#uploadStarTeamName").text(data);
-    $("#_base64ImgStar").val("");
-
-    const API =
-        "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionTeams%2FXACT_GET_STAROFTHEDAY";
-    const API_URL = ipAddress + API + contentType + externalCred;
-    const Local_URL = "./JS/dummy_data/imgSelect.json";
-
-    const params = {
-        'Param.1': data
-    };
-    // console.log('k-', API_URL)
-    ajaxCall(
-        API_URL,
-        params,
-        function(result) {
-            const dataList = result.Rowsets.Rowset ?
-                result.Rowsets.Rowset[0].Row : [];
-            // console.log('img',dataList)
-            document.getElementById("_noDataStar").style.display = "none";
-            document.getElementById("_uploadImgstar").style.display = "none";
-            if (dataList && dataList.length > 0) {
-                document.getElementById("_uploadImgstar").style.display = "block";
-                document.getElementById("_uploadImgstar").src = "data:image/png;base64," + dataList[0].BASE64;
-                $("#_base64ImgStar").val(dataList[0].BASE64);
-            } else {
-                document.getElementById("_noDataStar").style.display = "block";
-                // console.log("no data");
-            }
-        },
-        function(err) {
-            console.log("err", err);
-        }
-    );
-}
-
-
-
-
-function starData() {
-    let team = $("#uploadStarTeamName").text();
-    let src = $("#_base64ImgStar").val().split(",");
-    console.log(src[0]);
-    //console.log(src);
-    $("#sbt_star").text("");
-
-    if (src) {
-        $("#btn_star").addClass("enable");
-        const API_URL =
-            "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionTeams%2FXACT_UPDATE_STAR&IsTesting=T&Content-Type=text%2Fjson";
-        // const API_URL = ipAddress + API + contentType + externalCred;
-        const Local_URL = "./JS/dummy_data/imgSelect.json";
-
-        const params = {
-            "Param.1": team,
-            "Param.2": src[1],
-        };
-        // console.log('k-', API_URL)
-        ajaxCall1(
-            API_URL,
-            params,
-            function(result) {
-                const dataList = result.Rowsets.Rowset ?
-                    result.Rowsets.Rowset[0].Row : [];
-                $("#btn_star").removeClass("enable");
-                $("#_uploadStar").modal("close");
-            },
-            function(err) {
-                $("#btn_star").removeClass("enable");
-                console.log("err", err);
-            }
-        );
-    } else {
-        // console.log('k-', 97)
-        $("#btn_star").removeClass("enable");
-        $("#sbt_star").text("Image field is missing");
-    }
-}

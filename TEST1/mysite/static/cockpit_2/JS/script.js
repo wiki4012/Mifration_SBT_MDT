@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = function () {
     $(".modal").modal();
     selectTechno();
 
@@ -7,8 +7,8 @@ window.onload = function() {
         duration: 1200,
     });
 };
-$(document).ready(function() {
-    $('input[type=checkbox][name=ischarter]').change(function() {
+$(document).ready(function () {
+    $('input[type=checkbox][name=ischarter]').change(function () {
         if ($(this).prop("checked")) {
             $(this).val('true');
         } else {
@@ -17,16 +17,16 @@ $(document).ready(function() {
     });
 });
 
-$(function() {
-    $('input[id$=_target_w1]').keyup(function() {
+$(function () {
+    $('input[id$=_target_w1]').keyup(function () {
         var txtClone = $(this).val();
         $('input[id$=_target_w2]').val(txtClone);
         $('input[id$=_target_w3]').val(txtClone);
         $('input[id$=_target_w4]').val(txtClone);
     });
 });
-$(function() {
-    $('input[id$=_trigger_w1]').keyup(function() {
+$(function () {
+    $('input[id$=_trigger_w1]').keyup(function () {
         var txtClone = $(this).val();
         $('input[id$=_trigger_w2]').val(txtClone);
         $('input[id$=_trigger_w3]').val(txtClone);
@@ -42,87 +42,40 @@ async function selectTechno() {
     console.warn(result);
     var htm = "";
     if (result && result.length > 0) {
-      $.each(result, function (i, item) {
-        htm +=
-          "<option value='" +
-          item.team_name +
-          "'>" +
-          item.team_name +
-          "</option>";
-      });
-      $("#_team").append(htm);
+        $.each(result, function (i, item) {
+            htm +=
+                "<option value='" +
+                item.shift +
+                "~" +
+                item.team_name +
+                "'>" +
+                item.team_name +
+                "</option>";
+        });
+        $("#_team").append(htm);
     }
-  }
+}
 
-// function selectTeam() {
-//     const API ="/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteMasterTeam";
-//        // "/XMII/Illuminator?QueryTemplate=Test%2FCOCKPIT_2%2FQRY%2FExecuteMasterTeam"; // Create dupl. - SQL DEETE GRAPH SELECT.
 
-//     const API_URL = ipAddress + API + contentType + externalCred;
-//     const Local_URL = "./JS/dummy_data/team.json";
-
-//     const params = {};
-//     ajaxCall(
-//         API_URL,
-//         params,
-//         function(result) {
-//             $("#_team").empty();
-//             $("#_team").append("<option value='' disabled>Select Team</option>");
-//             const dataList = result.Rowsets.Rowset ?
-//                 result.Rowsets.Rowset[0].Row : [];
-//             // console.log("ajax-response", dataList);
-//             var htm = "";
-//             if (dataList && dataList.length > 0) {
-//                 $.each(dataList, function(i, item) {
-//                     htm +=
-//                         "<option value='" +
-//                         item.SHIFT +
-//                         "~" +
-//                         item.TEAM_NAME +
-//                         "'>" +
-//                         item.TEAM_NAME +
-//                         "</option>";
-//                 });
-//                 $("#_team").append(htm);
-//                 const pantV = {
-//                     value: dataList[0].TEAM_NAME,
-//                 };
-//                 _lists();
-//             } else {
-//                 // console.log("no data");
-
-//                 $("#_team").append(
-//                     "<option value='' selected disabled>Select Team</option> <option value='' disabled>No Data</option>"
-//                 );
-//             }
-//         },
-//         function(err) {
-//             console.log("err", err);
-//             $("#_team").append(
-//                 "<option value='' selected disabled>Select Team</option> <option value='' disabled>No Data</option>"
-//             );
-//         }
-//     );
-// }
 
 function _lists() {
     var yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     $('input[name="_datepicker"]').daterangepicker({
-            singleDatePicker: true,
-            autoApply: true,
-            "opens": "left",
-            "drops": "down",
-            showDropdowns: true,
-            minYear: 1901,
-            maxYear: parseInt(moment().format("YYYY"), 10),
-            startDate: yesterday,
-            maxDate: yesterday,
-            locale: {
-                format: "MM-DD-YYYY",
-            },
+        singleDatePicker: true,
+        autoApply: true,
+        "opens": "left",
+        "drops": "down",
+        showDropdowns: true,
+        minYear: 1901,
+        maxYear: parseInt(moment().format("YYYY"), 10),
+        startDate: yesterday,
+        maxDate: yesterday,
+        locale: {
+            format: "MM-DD-YYYY",
         },
-        function(start, end, label) {
+    },
+        function (start, end, label) {
             // console.log(
             //   "A new date selection was made: " + start.format("YYYY-MM-DD")
             // );
@@ -155,71 +108,75 @@ function kpiupload() {
     document.getElementById("_progress").style.display = "none";
 }
 
-  function getKPI() {
-        
-        const shift = teamShift().shift;
-        const shift1 = teamShift().shift.trim();
-        console.log("-------S-----H----I-----F------T-----------",shift);
-        console.log("-------S-----H----I-----F------T-----------",shift1);
-        const API =
-       "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionTeams%2FXACUTE_TRX_GET_KPI_MANUALLY_BY_SHIFT"; //Vikrant
-    const API_URL = ipAddress + API + contentType + externalCred;
-    const Local_URL = "./JS/dummy_data/triggerTarget.json";
+function getKPI() {
 
-   const params = {
-       "Param.1":shift1,
-   };
-   ajaxCall(
-    API_URL,
-    params,
-    function(err){
-        console.log("err",err);
-    }
-   );
-alert("KPI FETCHED PLEASE REFRESH OR RESELECT");
-   }
-function _graph(team) {
+    const shift = teamShift().shift;
+    const shift1 = teamShift().shift.trim();
+    console.log("-------S-----H----I-----F------T-----------", shift);
+    console.log("-------S-----H----I-----F------T-----------", shift1);
     const API =
-        "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FQuery%2FTRIGGER_LOGIC%2FXACT_SELECT_KPI_TABLE"; // NO CHANGE
+        "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionTeams%2FXACUTE_TRX_GET_KPI_MANUALLY_BY_SHIFT"; //Vikrant
     const API_URL = ipAddress + API + contentType + externalCred;
     const Local_URL = "./JS/dummy_data/triggerTarget.json";
 
     const params = {
-        "Param.1": team,
+        "Param.1": shift1,
     };
-    // console.log('k-', API_URL)
     ajaxCall(
         API_URL,
         params,
-        function(result) {
-            const dataList = result.Rowsets.Rowset ?
-                result.Rowsets.Rowset[0].Row : [];
-            // console.log('sd',dataList)
+        function (err) {
+            console.log("err", err);
+        }
+    );
+    alert("KPI FETCHED PLEASE REFRESH OR RESELECT");
+}
+function _graph(team) {
+    // const API =
+    //     "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FQuery%2FTRIGGER_LOGIC%2FXACT_SELECT_KPI_TABLE"; // NO CHANGE
+    // const API_URL = ipAddress + API + contentType + externalCred;
+    // const Local_URL = "./JS/dummy_data/triggerTarget.json";
+
+    // const params = {
+    //     "Param.1": team,
+    // };
+    // console.log('k-', API_URL)
+    const date = $("#_datepicker").val();
+    var toDt = new Date(date);
+    $.ajax({
+        type: "GET",
+        url: 'get-kpiCurrentCockpit_2',
+        data: {
+            'team': team,
+            'ttMon': toDt.getMonth(),
+            'ttYear': toDt.getFullYear(),
+        },
+        success: function (result) {
             var htm = "";
-            if (dataList && dataList.length > 0) {
-                dataList.sort(function(a, b) {
-                    return parseFloat(a.GRAPH_ID) - parseFloat(b.GRAPH_ID);
+            if (result && result.length > 0) {
+                result.sort(function (a, b) {
+                    return parseFloat(a.graph_id) - parseFloat(b.graph_id);
                 });
-                $.each(dataList, function(i, item) {
+                $.each(result, function (i, item) {
                     htm +=
                         "<tr><td >" +
-                        item.GRAPH_ID +
+                        item.graph_id +
                         "</td><td>" +
-                        item.TEAM_NAME +
+                        item.team_name +
                         "</td><td colspan='2'>" +
-                        item.KPI +
+                        item.kpi +
                         "</td><td>" +
-                        item.LOWER_LIMIT_W1 + "," + item.LOWER_LIMIT_W2 + "," + item.LOWER_LIMIT_W3 + "," + item.LOWER_LIMIT_W4 +
+                        item.lower_limit_w1 + "," + item.lower_limit_w2 + "," + item.lower_limit_w3 + "," + item.lower_limit_w4 +
                         "</td><td>" +
-                        item.UPPER_LIMIT_W1 + "," + item.UPPER_LIMIT_W2 + "," + item.UPPER_LIMIT_W3 + "," + item.UPPER_LIMIT_W4 +
+                        item.upper_limit_w1 + "," + item.upper_limit_w2 + "," + item.upper_limit_w3 + "," + item.upper_limit_w4 +
                         "</td><td>" +
-                        item.UNITFORYAXIS +
+                        item.unitforyaxis +
                         "</td><td>" +
-                        item.CALC_LOGIC +
+                        item.calc_logic +
                         "</td><td>" +
-                        item.UPDATE_FREQ +
+                        item.update_freq +
                         "</td><td>" +
-                        item.IS_CHARTER_KPI +
+                        item.is_charter_kpi +
                         "</td>" +
                         "<td class='_banner' onclick='modal1open(" +
                         JSON.stringify(item) +
@@ -234,11 +191,59 @@ function _graph(team) {
                     "<tr><td colspan='7' class='text-center'>" + "No Data" + "</td></tr>";
                 $("#_graphList tbody").html(noData);
             }
-        },
-        function(err) {
-            console.log("err", err);
         }
-    );
+    });
+    // ajaxCall(
+    //     API_URL,
+    //     params,
+    //     function (result) {
+    //         const dataList = result.Rowsets.Rowset ?
+    //             result.Rowsets.Rowset[0].Row : [];
+    //         // console.log('sd',dataList)
+    //         var htm = "";
+    //         if (dataList && dataList.length > 0) {
+    //             dataList.sort(function (a, b) {
+    //                 return parseFloat(a.GRAPH_ID) - parseFloat(b.GRAPH_ID);
+    //             });
+    //             $.each(dataList, function (i, item) {
+    //                 htm +=
+    //                     "<tr><td >" +
+    //                     item.GRAPH_ID +
+    //                     "</td><td>" +
+    //                     item.TEAM_NAME +
+    //                     "</td><td colspan='2'>" +
+    //                     item.KPI +
+    //                     "</td><td>" +
+    //                     item.LOWER_LIMIT_W1 + "," + item.LOWER_LIMIT_W2 + "," + item.LOWER_LIMIT_W3 + "," + item.LOWER_LIMIT_W4 +
+    //                     "</td><td>" +
+    //                     item.UPPER_LIMIT_W1 + "," + item.UPPER_LIMIT_W2 + "," + item.UPPER_LIMIT_W3 + "," + item.UPPER_LIMIT_W4 +
+    //                     "</td><td>" +
+    //                     item.UNITFORYAXIS +
+    //                     "</td><td>" +
+    //                     item.CALC_LOGIC +
+    //                     "</td><td>" +
+    //                     item.UPDATE_FREQ +
+    //                     "</td><td>" +
+    //                     item.IS_CHARTER_KPI +
+    //                     "</td>" +
+    //                     "<td class='_banner' onclick='modal1open(" +
+    //                     JSON.stringify(item) +
+    //                     ")'>" +
+    //                     "Edit" +
+    //                     "</td></tr>";
+    //             });
+    //             $("#_graphList tbody").html(htm);
+    //         } else {
+    //             // console.log("no data for table");
+    //             var noData =
+    //                 "<tr><td colspan='7' class='text-center'>" + "No Data" + "</td></tr>";
+    //             $("#_graphList tbody").html(noData);
+    //         }
+    //     },
+    //     function (err) {
+    //         console.log("err", err);
+    //     }
+    // );
 }
 
 function modal1open(data) {
@@ -306,7 +311,7 @@ function clearGraph() {
     ajaxCall(
         API_URL,
         params,
-        function(result) {
+        function (result) {
             const dataList = result.Rowsets.Rowset ?
                 result.Rowsets.Rowset[0].Row : [];
 
@@ -322,11 +327,11 @@ function clearGraph() {
             //   $("#graph_err").text("Record Already Exist");
             // }
         },
-        function(err) {
+        function (err) {
             console.log("err", err);
         }
     );
-    setTimeout(function() {
+    setTimeout(function () {
         $("#btn_graph").removeClass("enable");
         document.getElementById("graph_err").style.display = "none";
     }, 5000);
@@ -382,7 +387,7 @@ function updateGraph() {
         ajaxCall(
             API_URL,
             params,
-            function(result) {
+            function (result) {
                 const dataList = result.Rowsets.Rowset ?
                     result.Rowsets.Rowset[0].Row : [];
 
@@ -398,7 +403,7 @@ function updateGraph() {
                 //   $("#graph_err").text("Record Already Exist");
                 // }
             },
-            function(err) {
+            function (err) {
                 console.log("err", err);
             }
         );
@@ -406,13 +411,13 @@ function updateGraph() {
         const err = !data1 ?
             "KPI Name" :
             !data2 ?
-            "UOM" :
-            "Trigger & Target";
+                "UOM" :
+                "Trigger & Target";
         const _err = err + " field is missing";
         document.getElementById("graph_err").style.display = "block";
         $("#graph_err").text(_err);
     }
-    setTimeout(function() {
+    setTimeout(function () {
         $("#btn_graph").removeClass("enable");
         document.getElementById("graph_err").style.display = "none";
     }, 5000);
@@ -421,49 +426,52 @@ function updateGraph() {
 function KPIValues() {
     const team = teamShift().team;
     const date = $("#_datepicker").val();
-    const API ="/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteSelectManual";
-       // "/XMII/Illuminator?QueryTemplate=Test%2FQRY%2FXACT_SELECT_MANNUAL_KPI"; //CREATE NEW
-    const API_URL = ipAddress + API + contentType + externalCred;
-    const Local_URL = "./JS/dummy_data/kpiupdate.json";
+    // const API ="/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteSelectManual";
+    //    // "/XMII/Illuminator?QueryTemplate=Test%2FQRY%2FXACT_SELECT_MANNUAL_KPI"; //CREATE NEW
+    // const API_URL = ipAddress + API + contentType + externalCred;
+    // const Local_URL = "./JS/dummy_data/kpiupdate.json";
 
-    const params = {
-        "Param.1": team,
-        "Param.2": dateConvert(date),
-    };
+    // const params = {
+    //     "Param.1": team,
+    //     "Param.2": dateConvert(date),
+    // };
     // console.log("k-", params);
-    ajaxCall(
-        API_URL,
-        params,
-        function(result) {
-            const dataList = result.Rowsets.Rowset ?
-                result.Rowsets.Rowset[0].Row : [];
-            // console.log("sd", dataList);
-            var htm = "";
-            if (dataList && dataList.length > 0) {
-                dataList.sort(function(a, b) {
-                    return parseFloat(a.GRAPH_ID) - parseFloat(b.GRAPH_ID);
+    $.ajax({
+
+        type: "GET",
+        url: 'get-kpiCockpit_2',
+        data: {
+            'team': team,
+            'date': moment(dateConvert(date)).format("YYYY-MM-DD"),
+
+        },
+        success: function (result) {
+
+            if (result && result.length > 0) {
+                result.sort(function (a, b) {
+                    return parseFloat(a.graph_id) - parseFloat(b.graph_id);
                 });
-                console.log(dataList);
-                $.each(dataList, function(i, item) {
+                console.log(result);
+                $.each(result, function (i, item) {
                     // if (item.TEAM_MEMBER) {
-                    var newDt = moment(item.DATE, "MM/DD/YYYY");
+                    var newDt = moment(item.kpi_date, "MM/DD/YYYY");
                     var Date = moment(newDt).format("MM/DD/YYYY");
-                    if (item.GRAPH_ID != 21) {
+                    if (item.graph_id != 21) {
                         htm +=
                             "<tr><td>" +
-                            item.TEAM_NAME +
+                            item.teamName +
                             "</td><td>" +
-                            Date +
+                            kpi_date +
                             "</td><td>" +
-                            item.SHIFT +
+                            item.shift +
                             "</td><td>" +
-                            item.GRAPH_ID +
+                            item.graph_id +
                             "</td><td colspan='2'>" +
-                            item.KPI_NAME +
+                            item.kpi_name +
                             "</td><td>" +
-                            item.VALUE +
+                            item.kpi_value +
                             "</td><td> 1 " +
-                            "</td>" + "<td colspan = '2'> " + item.COMMENTS +
+                            "</td>" + "<td colspan = '2'> " + item.comments +
                             "</td>" +
                             "</td><td class='_banner' onclick='KPIModal(" +
                             JSON.stringify(item) +
@@ -480,11 +488,64 @@ function KPIValues() {
                     "<tr><td colspan='9' class='text-center'>" + "No Data" + "</td></tr>";
                 $("#_KpiValues tbody").html(noData);
             }
-        },
-        function(err) {
-            console.log("err", err);
+
+
         }
-    );
+    });
+    // ajaxCall(
+    //     API_URL,
+    //     params,
+    //     function (result) {
+    //         const dataList = result.Rowsets.Rowset ?
+    //             result.Rowsets.Rowset[0].Row : [];
+    //         // console.log("sd", dataList);
+    //         var htm = "";
+    //         if (dataList && dataList.length > 0) {
+    //             dataList.sort(function (a, b) {
+    //                 return parseFloat(a.GRAPH_ID) - parseFloat(b.GRAPH_ID);
+    //             });
+    //             console.log(dataList);
+    //             $.each(dataList, function (i, item) {
+    //                 // if (item.TEAM_MEMBER) {
+    //                 var newDt = moment(item.DATE, "MM/DD/YYYY");
+    //                 var Date = moment(newDt).format("MM/DD/YYYY");
+    //                 if (item.GRAPH_ID != 21) {
+    //                     htm +=
+    //                         "<tr><td>" +
+    //                         item.TEAM_NAME +
+    //                         "</td><td>" +
+    //                         Date +
+    //                         "</td><td>" +
+    //                         item.SHIFT +
+    //                         "</td><td>" +
+    //                         item.GRAPH_ID +
+    //                         "</td><td colspan='2'>" +
+    //                         item.KPI_NAME +
+    //                         "</td><td>" +
+    //                         item.VALUE +
+    //                         "</td><td> 1 " +
+    //                         "</td>" + "<td colspan = '2'> " + item.COMMENTS +
+    //                         "</td>" +
+    //                         "</td><td class='_banner' onclick='KPIModal(" +
+    //                         JSON.stringify(item) +
+    //                         ")'>" +
+    //                         "Edit" +
+    //                         "</td></tr>";
+    //                 }
+    //                 // }
+    //             });
+    //             $("#_KpiValues tbody").html(htm);
+    //         } else {
+    //             // console.log("no data for table");
+    //             var noData =
+    //                 "<tr><td colspan='9' class='text-center'>" + "No Data" + "</td></tr>";
+    //             $("#_KpiValues tbody").html(noData);
+    //         }
+    //     },
+    //     function (err) {
+    //         console.log("err", err);
+    //     }
+    // );
 }
 
 function KPIModal(data) {
@@ -525,8 +586,8 @@ function KPIUpdate() {
     if (dataC) {
         $("#btn_KPI").addClass("enable");
 
-        const API ="/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteManualUpdate";
-           // "/XMII/Illuminator?QueryTemplate=Test%2FQRY%2FUPDATE_ZKPI_MANUAL_DATE_NEW"; // CREATE NEW
+        const API = "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteManualUpdate";
+        // "/XMII/Illuminator?QueryTemplate=Test%2FQRY%2FUPDATE_ZKPI_MANUAL_DATE_NEW"; // CREATE NEW
         const API_URL = ipAddress + API + contentType + externalCred;
         const Local_URL = "./JS/dummy_data/GET_HOLIDAY.json";
         const params = {
@@ -544,7 +605,7 @@ function KPIUpdate() {
         ajaxCall(
             API_URL,
             params,
-            function(result) {
+            function (result) {
                 const dataList = result.Rowsets.Rowset ?
                     result.Rowsets.Rowset[0].Row : [];
 
@@ -552,7 +613,7 @@ function KPIUpdate() {
                 $("#KPIModal").modal("close");
                 KPIValues();
             },
-            function(err) {
+            function (err) {
                 // $("#btn_KPI").removeClass("enable");
                 console.log("err", err);
             }
@@ -563,7 +624,7 @@ function KPIUpdate() {
         document.getElementById("KPI_err").style.display = "block";
         $("#KPI_err").text(_err);
     }
-    setTimeout(function() {
+    setTimeout(function () {
         $("#btn_KPI").removeClass("enable");
         document.getElementById("KPI_err").style.display = "none";
     }, 5000);
@@ -572,11 +633,11 @@ function KPIUpdate() {
 function selectFile() {
     document
         .getElementById("fileUpload")
-        .addEventListener("change", function(event) {
+        .addEventListener("change", function (event) {
             selectedFile = event.target.files[0];
             if (selectedFile) {
                 var fileReader = new FileReader();
-                fileReader.onload = function(event) {
+                fileReader.onload = function (event) {
                     var data = event.target.result;
                     var workbook = XLSX.read(data, {
                         type: "binary",
@@ -602,7 +663,7 @@ function exceltoJson(data) {
     // console.log("data", data);
     if (data && data.length > 0) {
         excelData = [];
-        $.each(data, function(i, item) {
+        $.each(data, function (i, item) {
             if (item.DATE != moment().format('DD-MM-YYYY')) {
                 const API =
                     "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteManualUpdate"; // CREATE NEW
@@ -622,13 +683,13 @@ function exceltoJson(data) {
                 ajaxCall(
                     API_URL,
                     params,
-                    function(result) {
+                    function (result) {
                         const excelList = result.Rowsets.Rowset ?
                             result.Rowsets.Rowset[0].Row : [];
 
                         // console.log("excelData.push(excelList[0]);", excelData);
                     },
-                    function(err) {
+                    function (err) {
                         console.log("err", err);
                         document.getElementById("_progress").style.display = "none";
                         $("#modaluploadkpi").modal("close");
@@ -653,7 +714,7 @@ function ajaxCall(url, params, callback, error) {
         type: "GET",
         url: url,
         dataType: "json",
-        data: {...params },
+        data: { ...params },
         success: callback,
         error: error,
     });
@@ -665,7 +726,7 @@ function excelData() {
         GRAPHID: "1",
         KPI_NAME: "KPI NAME",
         VALUE: "30"
-    }, ];
+    },];
     const ShowLabel = true;
     const ReportTitle = "SBT_" + moment().unix();
     var arrData = typeof JSONData != "object" ? JSON.parse(JSONData) : JSONData;
