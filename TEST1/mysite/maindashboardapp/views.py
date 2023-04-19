@@ -7,6 +7,8 @@ from .serializers import *
 from .models import *
 from htmls import *
 from django.http import HttpResponse
+import csv
+
 
 
 def main_dashboard(request):
@@ -38,7 +40,7 @@ def capa(request):
 
 # TEAMS_NAME.l
 
-
+#TEST
 @api_view(['GET'])
 def apiOverview(request):
     api_urls = {
@@ -51,15 +53,29 @@ def apiOverview(request):
 
     return Response(api_urls)
 
+def export(request):
+    team = "MDT - Production Pioneers"
+    fromDate = '2023-01-01'
+    toDate = '2023-01-31'
+    response = HttpResponse(content_type='text/csv')
+
+    writer = csv.writer(response)
+    writer.writerow(['team_name', 'team_member', 'shift', 'att_date','attendance'])
+
+    for member in ZsbtAttendance.objects.raw(
+        "select att_id,team_member,sum( case when ATTENDANCE = 'P' then 1 else 0 end) Present,sum( case when ATTENDANCE ='A' then 1 else 0 end) Absent, sum( case when ATTENDANCE !='NA' then 1 else 0 end) Total from ZSBT_ATTENDANCE where team_name = '{0}' and to_char(cast(att_date as date),'yyyy-mm-dd') >='{1}' and to_char(cast(att_date as date),'yyyy-mm-dd') <='{2}' group by team_member ,att_id".format(team,fromDate,toDate)):
+        writer.writerow(ZsbtAttendance)
+
+    response['Content-Disposition'] = 'attachment; filename="members.csv"'
+
+    return response
+
 #  COCKPIT_1
-
-
 @api_view(['GET'])
 def taskList(request):
     tasks = ZsbtMasterTeams.objects.all().order_by('-team_id')
     serializer = ZsbtMasterTeamsSerializer(tasks, many=True)
     return Response(serializer.data)
-
 
 @api_view(['GET'])
 def getTeamMembers(request):
@@ -74,27 +90,6 @@ def getTeamMembers(request):
     return Response(serializer.data)
     # return HttpResponse(searchWord)
 
-
-# TRRIGER_HIT_CASES.
-# @api_view(['GET'])
-# def triggerHitCases(request):
-#     tasks = ZsbtMasterTeams.objects.all().filter(shift='A').values()
-#     # tasks = ZsbtMasterTeams.objects.raw("SELECT * FROM main_dashboard_app;")
-#     serializer = ZsbtMasterTeamsSerializer(tasks, many=True)
-#     return Response(serializer.data)
-
-# @api_view(['GET'])
-# @renderer_classes((TemplateHTMLRenderer, JSONRenderer))
-# def triggerHitCases(request):
-# #     temp = "SBT - Fast and Furious"
-# #     tasks = ZsbtTriggerHitCases.objects.all().filter(team_name=temp,ps_status = 'Created').values()
-#     # val = "maindashboardapp_ZsbtTriggerHitCases"
-#     tasks = ZsbtTriggerHitCases.objects.raw("select * from  maindashboardapp_ZsbtTriggerHitCases")
-#     # serializer = ZsbtTriggerHitCasesSerializer(tasks, many=True)
-#     # return Response(serializer.data)
-#     print(request)
-#     return render(request,template_name='main_dashboard_index.html')
-
 @api_view(['GET'])
 def triggerHitCases(request):
     temp = "SBT - Fast and Furious"
@@ -104,8 +99,41 @@ def triggerHitCases(request):
     serializer = ZsbtTriggerHitCasesSerializer(tasks, many=True)
     return Response(serializer.data)
 
-# Main_Dashboard
+@api_view(['GET'])
+def getAttDump(request):
+    team = request.GET.get('team')
+    fromDate = request.GET.get('fromDate')
+    toDate = request.GET.get('toDate')
+    print("hi-----------------------",team,fromDate,toDate)
+    # team = "MDT - Production Pioneers"
+    # fromDate = '2023-01-01'
+    # toDate = '2023-01-31'
+    # tasks = ZsbtTriggerHitCases.objects.all().filter(team_name=temp,ps_status = 'Created').values()
+    tasks = ZsbtAttendance.objects.raw(
+        "select att_id,team_member,sum( case when ATTENDANCE = 'P' then 1 else 0 end) Present,sum( case when ATTENDANCE ='A' then 1 else 0 end) Absent, sum( case when ATTENDANCE !='NA' then 1 else 0 end) Total from ZSBT_ATTENDANCE where team_name = '{0}' and to_char(cast(att_date as date),'yyyy-mm-dd') >='{1}' and to_char(cast(att_date as date),'yyyy-mm-dd') <='{2}' group by team_member ,att_id".format(team,fromDate,toDate))
+    serializer = ZsbtAttendanceSerializer(tasks, many=True)
+    print(tasks)
+    return Response(serializer.data)
 
+@api_view(['GET'])
+def getCapaDump(request):
+    # team = request.GET.get('team')
+    # fromDate = request.GET.get('fromDate')
+    # toDate = request.GET.get('toDate')
+    
+    team = 'MDT - Production Pioneers'
+    fromDate = '2022-01-01'
+    toDate = '2022-01-21'
+    print("hi-----------------------",team,fromDate,toDate)
+    # tasks = ZsbtTriggerHitCases.objects.all().filter(team_name=temp,ps_status = 'Created').values()
+    tasks = ZsbtCapaRecordsMaster.objects.raw(  
+    "SELECT * FROM  ZSBT_CAPA_RECORDS_MASTER WHERE  TEAM_NAME  = '{0}' AND to_char(cast(DATE_ALLOCATION as date),'yyyy-mm-dd') >= '{1}' and to_char(cast(DATE_ALLOCATION as date),'yyyy-mm-dd') <='{2}' ORDER BY DATE_ALLOCATION DESC".format(team,fromDate,toDate))
+    serializer = ZsbtCapaRecordsMasterSerializer(tasks, many=True)
+    print(tasks)
+    return Response(serializer.data)
+
+
+# Main_Dashboard
 
 @api_view(['GET'])
 def getMeetingAgenda(request):
@@ -119,7 +147,6 @@ def getMeetingAgenda(request):
     serializer = ZsbtMeetingAgendaTableSerializer(tasks, many=True)
     return Response(serializer.data)
 
-
 @api_view(['GET'])
 def getShiftWiseMember(request):
     print("hi_mian")
@@ -131,7 +158,6 @@ def getShiftWiseMember(request):
     print(tasks)
     serializer = ZsbtAttendanceSerializer(tasks, many=True)
     return Response(serializer.data)
-
 
 @api_view(['GET'])
 def getKpiDaily(request):
@@ -157,7 +183,6 @@ def getKpiDaily(request):
     serializer = ZkpiManualDateSerializer(tasks, many=True)
     return Response(serializer.data)
 
-
 @api_view(['GET'])
 def getKpiByMonth(request):
     print("hi_mian")
@@ -178,7 +203,7 @@ def getKpiByMonth(request):
     return Response(serializer.data)
 
 
-# MONTHLY
+#MONTHLY
 
 @api_view(['GET'])
 def getKpiMonthly(request):
@@ -207,7 +232,7 @@ def getKpiMonthlyUnion(request):
     tasks2 = ZsbtMasterKpi.objects.raw(
         "SELECT * FROM ZSBT_MASTER_KPI WHERE TEAM_NAME = '{0}' and TTMONTH ='{1}' and TTYEAR = '{2}' and graph_id = '{3}' ORDER BY GRAPH_ID".format(team, ttMon, ttYear,graphId))
     # print('MONTHLY_nn',tasks)
-  
+    complet_task = tasks|tasks2
     serializer1 = ZkpiManualDateSerializer(tasks, many=True)
     serializer2 = ZsbtMasterKpiSerializer(tasks2, many=True)
     model_combination = ZsbtMasterKpi.union(ZsbtMasterKpi, all=True)
@@ -256,6 +281,7 @@ def getKpiCockpit_2(request):
 
 @api_view(['GET'])
 def getCurrentKpiCockpit_2(request):
+
     print("hi_mian")
     team = request.GET.get('team')
     ttMon = request.GET.get('ttMon')
@@ -266,4 +292,44 @@ def getCurrentKpiCockpit_2(request):
     # tasks = ZkpiManualDate.objects.raw("SELECT * FROM ZKPI_MANUAL_DATE where KPI_DATE>='01-01-2023' and KPI_DATE <='21-01-2023' and TEAM_NAME = 'MDT - Production Pioneers' order by graph_id,kpi_date FETCH NEXT 10 ROWS ONLY")
     print('hittt', tasks)
     serializer = ZsbtMasterKpiSerializer(tasks, many=True)
+    return Response(serializer.data)
+
+#CAPA
+@api_view(['GET'])
+def getProblemSolving(request):
+    print("hi_mian")
+    team = request.GET.get('team')
+    fromDate = request.GET.get('fromDate')
+    toDate = request.GET.get('toDate')
+    # team = "MDT - Production Pioneers"
+    # fromDate = "2022-01-01"
+    # toDate = "2022-01-31"
+    print("parameters",team,fromDate,toDate)
+    # searchWord = request.GET.get('team')
+    # print("searchWord",searchWord)
+    # tasks = ZsbtMeetingAgendaTable.objects.all().filter(team_name=searchWord).values()
+    # tasks = ZkpiManualDate.objects.raw("select MANNUAL_KPI_ID,kpi_name from ZKPI_MANUAL_DATE ")
+    tasks = ZsbtCapaRecordsMaster.objects.raw(
+        "SELECT * FROM  ZSBT_CAPA_RECORDS_MASTER WHERE  TEAM_NAME  = '{0}' AND to_char(cast(DATE_ALLOCATION as date),'yyyy-mm-dd') >= '{1}' and to_char(cast(DATE_ALLOCATION as date),'yyyy-mm-dd') <='{2}' ORDER BY DATE_ALLOCATION DESC".format(team, fromDate, toDate))
+    # tasks = ZkpiManualDate.objects.raw("SELECT * FROM ZKPI_MANUAL_DATE where KPI_DATE>='01-01-2023' and KPI_DATE <='21-01-2023' and TEAM_NAME = 'MDT - Production Pioneers' order by graph_id,kpi_date FETCH NEXT 10 ROWS ONLY")
+    print('hittt', tasks)
+    serializer = ZsbtCapaRecordsMasterSerializer(tasks, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def getActionables(request):
+    print("hi_mian")
+    team = request.GET.get('team')
+    fromDate = request.GET.get('fromDate')
+    toDate = request.GET.get('toDate')
+    # team = 'MDT - Production Pioneers'
+    # fromDate = '2023-03-01'
+    # toDate = '2023-03-31'
+    print("parameters",team,fromDate,toDate)
+    
+    tasks = ZsbtCapaActionable.objects.raw(
+        "SELECT * FROM ZSBT_CAPA_ACTIONABLE WHERE TEAM_NAME = '{0}' and to_char(cast(CREATION_DATE as date),'yyyy-mm-dd') >= '{1}' and to_char(cast(CREATION_DATE as date),'yyyy-mm-dd') <='{2}' ORDER BY STATUS DESC".format(team, fromDate, toDate))
+    # tasks = ZkpiManualDate.objects.raw("SELECT * FROM ZKPI_MANUAL_DATE where KPI_DATE>='01-01-2023' and KPI_DATE <='21-01-2023' and TEAM_NAME = 'MDT - Production Pioneers' order by graph_id,kpi_date FETCH NEXT 10 ROWS ONLY")
+    print('hittt', tasks)
+    serializer = ZsbtCapaActionableSerializer(tasks, many=True)
     return Response(serializer.data)

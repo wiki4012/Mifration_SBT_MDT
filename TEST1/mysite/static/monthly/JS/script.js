@@ -165,7 +165,6 @@ function chartList(teamName) {
 
                     });
                     console.log("ajax-charts", charts);
-
                     if (result && result.length > 0) {
                         $.each(result, function (i, item) {
                             let index = charts.findIndex((x) => parseInt(x.graph_id) === parseInt(item.graph_id));

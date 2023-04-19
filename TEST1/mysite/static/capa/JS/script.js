@@ -6,7 +6,7 @@ window.onload = function () {
     var today = new Date();
     var endDate = new Date();
     var autoclosuredate = new Date();
-    autoclosuredate.setDate(today.getDate() + 10);
+    autoclosuredate.setDate(today.getDate() + 2);
     endDate.setDate(endDate.getDay() - 7);
     $('input[name="_daterange"]').daterangepicker({
         // singleDatePicker: true,
@@ -41,12 +41,13 @@ window.onload = function () {
         // autoUpdateInput :false,
         autoApply: true,
         showDropdowns: true,
-        minYear: parseInt(moment().format("YYYY"), 1),
-        // maxYear: parseInt(moment().format("YYYY"), 1),
-        startDate: autoclosuredate,
-        minDate: today,
+        minYear: 1901,
+        maxYear: parseInt(moment().format("YYYY"), 10),
+        startDate: new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000),
+        endDate: today,
+        maxDate: new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000),
         locale: {
-            format: "MM-DD-YYYY",
+            format: "MM/DD/YYYY",
         },
     });
 
@@ -124,25 +125,24 @@ function verifyidentity(data) {
         );
     }
 }
-
 async function selectTechno() {
     let result = await (await fetch('http://127.0.0.1:8000/task-list')).json();
     console.warn(result);
     var htm = "";
     if (result && result.length > 0) {
-      $.each(result, function (i, item) {
-        htm +=
-          "<option value='" +
-          item.team_name +
-          "'>" +
-          item.team_name +
-          "</option>";
-      });
-      $("#_TECHNOCRATS").append(htm);
+        $.each(result, function (i, item) {
+            htm +=
+                "<option value='" +
+                item.team_name +
+                "'>" +
+                item.team_name +
+                "</option>";
+        });
+        $("#_TECHNOCRATS").append(htm);
     }
-  }
-
+}
 // function selectTechno() {
+//     console.log
 //     const API =
 //         "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTransactionKPI%2FExecuteMasterTeam";
 //     const API_URL = ipAddress + API + contentType + externalCred;
@@ -213,7 +213,6 @@ function listChart(data) {
     _table();
     getActionableData();
 }
-
 function KpiDrop(team) {
     const API =
         "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FQuery%2FTRIGGER_LOGIC%2FXACT_SELECT_KPI_TABLE";
@@ -229,6 +228,8 @@ function KpiDrop(team) {
         function (result) {
             $("._kpi").empty();
             $("._kpi").append("<option value='' disabled>Select KPI</option>");
+            $("._kpiact").empty();
+            $("._kpiact").append("<option value='' disabled>Select KPI</option>");
             const dataList = result.Rowsets.Rowset ?
                 result.Rowsets.Rowset[0].Row : [];
             // console.log("ajax-response", dataList);
@@ -241,10 +242,11 @@ function KpiDrop(team) {
                 });
                 htm += "<option value='Others'>Others</option>";
                 $("._kpi").append(htm);
+                $("._kpiact").append(htm);
             } else {
                 // console.log("no data");
 
-                $("._kpi").append(
+                $("#act_kpi").append(
                     "<option value='' selected disabled>Select KPI</option> <option value='' disabled>No Data</option>"
                 );
             }
@@ -270,7 +272,7 @@ function MemberDrop(team) {
         params,
         function (result) {
             $("._participants").empty();
-            $("._participants").append("<option value='' disabled>Select Member</option>");
+            //   $("._participants").append("<option value='' disabled>Select Member</option>");
             const dataList = result.Rowsets.Rowset ?
                 result.Rowsets.Rowset[0].Row : [];
             // console.log("ajax-response", dataList);
@@ -287,7 +289,7 @@ function MemberDrop(team) {
                 // console.log("no data");
 
                 $("._participants").append(
-                    " <option value='' disabled>No Data</option>"
+                    "<option value='' selected disabled>Select Member</option> <option value='' disabled>No Data</option>"
                 );
             }
         },
@@ -332,19 +334,28 @@ function MemberDrop(team) {
 var triggerlist = [];
 
 function triggerhitcases(team) {
+    const date = $("#_daterangeTable").val();
+    dates = date.split("-");
+    const from =
+        moment(dates[0], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
+    const to = moment(dates[1], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
+
     const API =
         "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FPS_LOGIC%2FXACT_AUTO_PS_TRIGGER";
     const API_URL = ipAddress + API + contentType + externalCred;
 
     const params = {
         "Param.1": team,
+        "Param.2": from,
+        "Param.3": to,
     };
+    console.log("DATE FILTER-----------------", params);
     ajaxCall(
         API_URL,
         params,
         function (result) {
             const dataC = result.Rowsets.Rowset ? result.Rowsets.Rowset[0].Row : [];
-            // console.log('sta', dataList)
+            console.log(dataC);
             if (dataC != undefined) {
                 const dataList = dataC && dataC.length > 0;
                 if (dataC.length > 0) {
@@ -383,7 +394,7 @@ function triggerhitcases(team) {
                 }
             } else {
                 $("#triggerhitnotification").css("display", "none");
-                // console.log("no data for table");
+                console.log("no data for table-----------------");
                 var noData =
                     "<tr><td colspan='12' class='text-center'>" +
                     "No Data" +
@@ -454,7 +465,7 @@ function triggerhitcases1(team, date) {
                 }
             } else {
                 $("#triggerhitnotification").css("display", "none");
-                // console.log("no data for table");
+                console.log("no data for table----------------ol");
                 var noData =
                     "<tr><td colspan='12' class='text-center'>" +
                     "No Data" +
@@ -708,12 +719,10 @@ function editcapa(KPI, kpihiton, teamname) {
                         item.WHAT +
                         "</td><td>" +
                         item.WHO +
-                        "</td>" +
-                        "<td>" +
-                        "<input type='text' style='text-align:center;' id='step4When" + item.CA_PAID + "' value='" + item.WHEN + "'>" +
-                        "</td>" +
-                        "<td>" +
-                        "<input type='text' style='text-align:center;' id='step4Status" + item.CA_PAID + "' value='" + item.STATUS + "'>" +
+                        "</td><td>" +
+                        item.WHEN +
+                        "</td><td>" +
+                        item.STATUS +
                         "</td>" +
                         //"<td class='consider' onclick='edit5capa(" +
                         //JSON.stringify(item) +
@@ -724,10 +733,6 @@ function editcapa(KPI, kpihiton, teamname) {
                         JSON.stringify(item) +
                         ")'>" +
                         "Delete" +
-                        "<td class='update' onclick='updatecapa(" +
-                        JSON.stringify(item) +
-                        ")'>" +
-                        "Update " +
                         "</td></tr>";
                 });
                 $("#_capa tbody").html(htm);
@@ -751,198 +756,206 @@ var _CAPAarray = [];
 
 function add5why() {
     htm = "";
-    var kpi = $("#_kpiedit").val();
-    if (kpi == '') {
-        kpi = 'Others';
-    }
-    const kpihiton = $("#_Kpi_hit_on").val();
-    const teamname = $("#_TECHNOCRATS").val();
-    const maincause = $("#maincause").val();
-    const subcause1 = $("#subcause1").val();
-    const subcause2 = $("#subcause2").val();
-    const subcause3 = $("#subcause3").val();
-    const rootcause = $("#rootcause").val();
-    if (kpi != "" || maincause != "" || subcause1 != "" || subcause2 != "" || subcause3 != "" || rootcause != "") {
-        // _5whyarray.push(maincause,subcause1,subcause2,subcause3,rootcause,"$");
-        const API =
-            "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FXact%2FXACT_CAPA_5WHY_INSERT";
-        const API_URL = ipAddress + API + contentType + externalCred;
-
-        const params = {
-            "Param.1": kpi,
-            "Param.2": dateService(kpihiton),
-            "Param.3": teamname,
-            "Param.4": maincause,
-            "Param.5": subcause1,
-            "Param.6": subcause2,
-            "Param.7": subcause3,
-            "Param.8": rootcause,
-        };
-        ajaxCall(
-            API_URL,
-            params,
-            function (result) {
-                const dataC = result.Rowsets.Rowset ? result.Rowsets.Rowset[0].Row : [];
-                // console.log('sta', dataList)
-                const dataList = dataC && dataC.length > 0;
-                $("#_5why tbody").empty();
-                if (dataC.length > 0) {
-                    var htm = "";
-                    $.each(dataC, function (i, item) {
-                        htm +=
-                            "<tr><td>" +
-                            item.MAIN_CAUSE +
-                            "</td><td>" +
-                            item.SUB_CAUSE1 +
-                            "</td>" +
-                            "<td>" +
-                            item.SUB_CAUSE2 +
-                            "</td>" +
-                            "<td>" +
-                            item.SUB_CAUSE3 +
-                            "</td>" +
-                            "<td>" +
-                            item.ROOT_CAUSE +
-                            "</td>" +
-                            //"<td class='consider' onclick='edit5why(" +
-                            //JSON.stringify(item) +
-                            //")'>" +
-                            //"Edit" +
-                            //"</td>"+
-                            "<td class='nconsider' onclick='delete5why(" +
-                            JSON.stringify(item) +
-                            ")'>" +
-                            "Delete" +
-                            "</td></tr>";
-                    });
-                    $("#_5why tbody").append(htm);
-                    $("#maincause").val("");
-                    $("#subcause1").val("");
-                    $("#subcause2").val("");
-                    $("#subcause3").val("");
-                    $("#rootcause").val("");
-                } else {
-                    // console.log("no data for table");
-                    var noData =
-                        "<tr><td colspan='12' class='text-center'>" +
-                        "No Data" +
-                        "</td></tr>";
-                    $("#_5why tbody").html(noData);
-                }
-            },
-            function (err) {
-                console.log("err", err);
-            }
-        );
+    if ($("#_kpi").val() == null) {
+        alert("ERROR: KPI not selected!");
     } else {
-        alert("Enter all the Fields to Add!");
+        var kpi = $("#_kpi").val();
+
+        // var kpi = $("#_kpiedit").val();
+        if (kpi == '') {
+            kpi = 'Others';
+        }
+        const kpihiton = $("#_Kpi_hit_on").val();
+        const teamname = $("#_TECHNOCRATS").val();
+        const maincause = $("#maincause").val();
+        const subcause1 = $("#subcause1").val();
+        const subcause2 = $("#subcause2").val();
+        const subcause3 = $("#subcause3").val();
+        const rootcause = $("#rootcause").val();
+        if (kpi != "" || maincause != "" || subcause1 != "" || subcause2 != "" || subcause3 != "" || rootcause != "") {
+            // _5whyarray.push(maincause,subcause1,subcause2,subcause3,rootcause,"$");
+            const API =
+                "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FXact%2FXACT_CAPA_5WHY_INSERT";
+            const API_URL = ipAddress + API + contentType + externalCred;
+
+            const params = {
+                "Param.1": kpi,
+                "Param.2": dateService(kpihiton),
+                "Param.3": teamname,
+                "Param.4": maincause,
+                "Param.5": subcause1,
+                "Param.6": subcause2,
+                "Param.7": subcause3,
+                "Param.8": rootcause,
+            };
+            ajaxCall(
+                API_URL,
+                params,
+                function (result) {
+                    const dataC = result.Rowsets.Rowset ? result.Rowsets.Rowset[0].Row : [];
+                    // console.log('sta', dataList)
+                    const dataList = dataC && dataC.length > 0;
+                    $("#_5why tbody").empty();
+                    if (dataC.length > 0) {
+                        var htm = "";
+                        $.each(dataC, function (i, item) {
+                            htm +=
+                                "<tr><td>" +
+                                item.MAIN_CAUSE +
+                                "</td><td>" +
+                                item.SUB_CAUSE1 +
+                                "</td>" +
+                                "<td>" +
+                                item.SUB_CAUSE2 +
+                                "</td>" +
+                                "<td>" +
+                                item.SUB_CAUSE3 +
+                                "</td>" +
+                                "<td>" +
+                                item.ROOT_CAUSE +
+                                "</td>" +
+                                //"<td class='consider' onclick='edit5why(" +
+                                //JSON.stringify(item) +
+                                //")'>" +
+                                //"Edit" +
+                                //"</td>"+
+                                "<td class='nconsider' onclick='delete5why(" +
+                                JSON.stringify(item) +
+                                ")'>" +
+                                "Delete" +
+                                "</td></tr>";
+                        });
+                        $("#_5why tbody").append(htm);
+                        $("#maincause").val("");
+                        $("#subcause1").val("");
+                        $("#subcause2").val("");
+                        $("#subcause3").val("");
+                        $("#rootcause").val("");
+                    } else {
+                        // console.log("no data for table");
+                        var noData =
+                            "<tr><td colspan='12' class='text-center'>" +
+                            "No Data" +
+                            "</td></tr>";
+                        $("#_5why tbody").html(noData);
+                    }
+                },
+                function (err) {
+                    console.log("err", err);
+                }
+            );
+        } else {
+            alert("Enter all the Fields to Add!");
+        }
     }
 }
 
 function addcapa() {
     htm = "";
-    var kpi = $("#_kpiedit").val();
-    if (kpi == '') {
-        kpi = 'Others';
-    }
-    const kpihiton = $("#_Kpi_hit_on").val();
-    const teamname = $("#_TECHNOCRATS").val();
-    const CAPA = $("#CAPA").val();
-    const capawhat = $("#capawhat").val();
-    const capawho = $("#capawho").val();
-    const capawhen = $("#capawhen").val();
-    const capastatus = $("#capastatus").val();
-    if (
-        kpi != " " ||
-        CAPA != " " ||
-        capawhat != " " ||
-        capawho != " " ||
-        capawhen != " " ||
-        capastatus != " "
-    ) {
-        const API =
-            "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FXact%2FXACT_CA_PA_TABLE_INSERT";
-        const API_URL = ipAddress + API + contentType + externalCred;
-
-        const params = {
-            "Param.1": kpi,
-            "Param.2": dateService(kpihiton),
-            "Param.3": teamname,
-            "Param.4": CAPA,
-            "Param.5": capawhat,
-            "Param.6": capawho,
-            "Param.7": capawhen,
-            "Param.8": capastatus,
-        };
-        ajaxCall(
-            API_URL,
-            params,
-            function (result) {
-                const dataC = result.Rowsets.Rowset ? result.Rowsets.Rowset[0].Row : [];
-                // console.log('sta', dataList)
-                const dataList = dataC && dataC.length > 0;
-                $("#_capa tbody").empty();
-                if (dataC.length > 0) {
-                    var htm = "";
-                    $.each(dataC, function (i, item) {
-                        htm +=
-                            "<tr><td>" +
-                            item.CAPA +
-                            "</td><td>" +
-                            item.WHAT +
-                            "</td><td>" +
-                            item.WHO +
-                            "</td>" +
-                            "<td>" +
-                            "<input type='text' style='text-align:center;' id='step4When" + item.CA_PAID + "' value='" + item.WHEN + "'>" +
-                            "</td>" +
-                            "<td>" +
-                            "<input type='text' style='text-align:center;' id='step4Status" + item.CA_PAID + "' value='" + item.STATUS + "'>" +
-                            "</td>" +
-                            //"<td class='consider' onclick='edit5capa(" +
-                            //JSON.stringify(item) +
-                            //")'>" +
-                            //"Edit" +
-                            //"</td>"+
-                            "<td class='nconsider' onclick='deletecapa(" +
-                            JSON.stringify(item) +
-                            ")'>" +
-                            "Delete" +
-                            "<td class='update' onclick='updatecapa(" +
-                            JSON.stringify(item) +
-                            ")'>" +
-                            "Update " +
-                            "</td></tr>";
-                    });
-                    $("#_capa tbody").append(htm);
-                    $("#CAPA").val("");
-                    $("#capawhat").val("");
-                    $("#capawho").val("");
-                    $("#capawhen").val("");
-                    $("#capastatus").val("");
-                } else {
-                    // console.log("no data for table");
-                    var noData =
-                        "<tr><td colspan='12' class='text-center'>" +
-                        "No Data" +
-                        "</td></tr>";
-                    $("#_capa tbody").html(noData);
-                    $("#CAPA").val("");
-                    $("#capawhat").val("");
-                    $("#capawho").val("");
-                    $("#capawhen").val("");
-                    $("#capastatus").val("");
-                }
-            },
-            function (err) {
-                console.log("err", err);
-            }
-        );
+    if ($("#_kpi").val() == null) {
+        alert("ERROR: KPI not selected!");
     } else {
-        // $('$capaerror').show();
-        alert("Enter all the Fields to Add!");
+        var kpi = $("#_kpi").val();
+        if (kpi == '') {
+            kpi = 'Others';
+        }
+        const kpihiton = $("#_Kpi_hit_on").val();
+        const teamname = $("#_TECHNOCRATS").val();
+        const CAPA = $("#CAPA").val();
+        const capawhat = $("#capawhat").val();
+        const capawho = $("#capawho").val();
+        const capawhen = $("#capawhen").val();
+        const capastatus = $("#capastatus").val();
+        if (
+            kpi != " " ||
+            CAPA != " " ||
+            capawhat != " " ||
+            capawho != " " ||
+            capawhen != " " ||
+            capastatus != " "
+        ) {
+            const API =
+                "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FXact%2FXACT_CA_PA_TABLE_INSERT";
+            const API_URL = ipAddress + API + contentType + externalCred;
+
+            const params = {
+                "Param.1": kpi,
+                "Param.2": dateService(kpihiton),
+                "Param.3": teamname,
+                "Param.4": CAPA,
+                "Param.5": capawhat,
+                "Param.6": capawho,
+                "Param.7": capawhen,
+                "Param.8": capastatus,
+            };
+            ajaxCall(
+                API_URL,
+                params,
+                function (result) {
+                    const dataC = result.Rowsets.Rowset ? result.Rowsets.Rowset[0].Row : [];
+                    // console.log('sta', dataList)
+                    const dataList = dataC && dataC.length > 0;
+                    $("#_capa tbody").empty();
+                    if (dataC.length > 0) {
+                        var htm = "";
+                        $.each(dataC, function (i, item) {
+                            htm +=
+                                "<tr><td>" +
+                                item.CAPA +
+                                "</td><td>" +
+                                item.WHAT +
+                                "</td>" +
+                                "<td>" +
+                                item.WHO +
+                                "</td>" +
+                                "<td>" +
+                                item.WHEN +
+                                "</td>" +
+                                "<td>" +
+                                item.STATUS +
+                                "</td>" +
+                                //"<td class='consider' onclick='edit5capa(" +
+                                //JSON.stringify(item) +
+                                //")'>" +
+                                //"Edit" +
+                                //"</td>"+
+                                "<td class='nconsider' onclick='deletecapa(" +
+                                JSON.stringify(item) +
+                                ")'>" +
+                                "Delete" +
+                                "</td></tr>";
+                        });
+                        $("#_capa tbody").append(htm);
+                        $("#CAPA").val("");
+                        $("#capawhat").val("");
+                        $("#capawho").val("");
+                        $("#capawhen").val("");
+                        $("#capastatus").val("");
+                    } else {
+                        // console.log("no data for table");
+                        var noData =
+                            "<tr><td colspan='12' class='text-center'>" +
+                            "No Data" +
+                            "</td></tr>";
+                        $("#_capa tbody").html(noData);
+                        $("#CAPA").val("");
+                        $("#capawhat").val("");
+                        $("#capawho").val("");
+                        $("#capawhen").val("");
+                        $("#capastatus").val("");
+                    }
+                },
+                function (err) {
+                    console.log("err", err);
+                }
+            );
+        } else {
+            // $('$capaerror').show();
+            alert("Enter all the Fields to Add!");
+        }
     }
 }
+
 
 function delete5why(data) {
     const API =
@@ -1032,88 +1045,15 @@ function deletecapa(data) {
                         item.CAPA +
                         "</td><td>" +
                         item.WHAT +
-                        "</td><td>" +
-                        item.WHO +
-                        "</td>" +
-                        "<td>" +
-                        "<input type='text' style='text-align:center;' id='step4When" + item.CA_PAID + "' value='" + item.WHEN + "'>" +
-                        "</td>" +
-                        "<td>" +
-                        "<input type='text' style='text-align:center;' id='step4Status" + item.CA_PAID + "' value='" + item.STATUS + "'>" +
-                        "</td>" +
-                        //"<td class='consider' onclick='edit5capa(" +
-                        //JSON.stringify(item) +
-                        //")'>" +
-                        //"Edit" +
-                        //"</td>"+
-                        "<td class='nconsider' onclick='deletecapa(" +
-                        JSON.stringify(item) +
-                        ")'>" +
-                        "Delete" +
-                        "<td class='update' onclick='updatecapa(" +
-                        JSON.stringify(item) +
-                        ")'>" +
-                        "Update " +
-                        "</td></tr>";
-                });
-                $("#_capa tbody").append(htm);
-            } else {
-                var noData =
-                    "<tr><td colspan='5' class='text-center'>" + "No Data" + "</td></tr>";
-                $("#_capa tbody").html(noData);
-            }
-        },
-        function (err) {
-            console.log("err", err);
-        }
-    );
-}
-
-function updatecapa(data) {
-    console.log("---------" + data.CA_PAID + "---WHEN" + document.getElementById("step4When" + data.CA_PAID).value + "----status" + document.getElementById("step4Status" + data.CA_PAID).value);
-    const API =
-        "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FXact%2FXACT_UPDATE_CAPA_STEP4";
-    // SBT_MDT%2FXact%2FXACT_UPDATE_CAPA_STEP4
-    const API_URL = ipAddress + API + contentType + externalCred;
-    const Local_URL = "./JS/dummy_data/NEW_SKU_DETAILS.json";
-
-    const params = {
-        "Param.1": data.CA_PAID,
-        "Param.3": data.KPI,
-        "Param.2": dateService(data.KPIHITON),
-        "Param.4": document.getElementById("step4When" + data.CA_PAID).value,
-        "Param.5": document.getElementById("step4Status" + data.CA_PAID).value,
-        "Param.6": data.TEAM_NAME,
-
-
-    };
-    console.log("params -----" + params["Param.1"] + params["Param.2"] + params["Param.3"] + params["Param.4"] + params["Param.5"] + params["Param.6"]);
-    // console.log('k-', API_URL)
-    ajaxCall(
-        API_URL,
-        params,
-        function (result) {
-            const dataC = result.Rowsets.Rowset ? result.Rowsets.Rowset[0].Row : [];
-            console.log("updatedata -----" + dataC);
-            if (dataC && dataC.length > 0) {
-                $("#_capa tbody").empty();
-                var htm = "";
-                $.each(dataC, function (i, item) {
-                    console.log("updatedata -----" + item.WHEN);
-                    htm +=
-                        "<tr><td>" +
-                        item.CAPA +
-                        "</td><td>" +
-                        item.WHAT +
                         "</td>" +
                         "<td>" +
                         item.WHO +
                         "</td>" +
                         "<td>" +
-                        "<input type='text' style='text-align:center;' id='step4When" + item.CA_PAID + "' value='" + item.WHEN + "'>" +
+                        item.WHEN +
                         "</td>" +
                         "<td>" +
-                        "<input type='text' style='text-align:center;' id='step4Status" + item.CA_PAID + "' value='" + item.STATUS + "'>" +
+                        item.STATUS +
                         "</td>" +
                         //"<td class='consider' onclick='edit5why(" +
                         //JSON.stringify(item) +
@@ -1124,10 +1064,6 @@ function updatecapa(data) {
                         JSON.stringify(item) +
                         ")'>" +
                         "Delete" +
-                        "<td class='update' onclick='updatecapa(" +
-                        JSON.stringify(item) +
-                        ")'>" +
-                        "Update " +
                         "</td></tr>";
                 });
                 $("#_capa tbody").append(htm);
@@ -1141,7 +1077,6 @@ function updatecapa(data) {
             console.log("err", err);
         }
     );
-
 }
 
 function clear5why() {
@@ -1227,7 +1162,7 @@ function considerps(data) {
     $('#successalerttrigger').hide();
     const today = new Date();
     const clsdate = $("#autotriggeredclosuredate").val();
-    //  clsdate.setDate(clsdate.getDate() + 10);
+    // clsdate.setDate(clsdate.getDate() + 10);
     const _kpi = !data ? "" : data.KPI;
     const _team = !data ? "" : data.TEAM_NAME;
     const _Kpi_hit_on = dateService(dateConvert(data.TRIGGERD_DATE));
@@ -1560,77 +1495,83 @@ function assess() {
 function _table() {
     getActionableData();
     const team = $("#_TECHNOCRATS").val();
+    triggerhitcases(team);
     const date = $("#_daterangeTable").val();
     dates = date.split("-");
     const from =
         moment(dates[0], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
     const to = moment(dates[1], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
 
-    const API =
-        "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FQuery%2FSELECT_MASTER_CAPA";
-    const API_URL = ipAddress + API + contentType + externalCred;
-    const Local_URL = "./JS/dummy_data/team.json";
+    // const API =
+    //     "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FQuery%2FSELECT_MASTER_CAPA";
+    // const API_URL = ipAddress + API + contentType + externalCred;
+    // const Local_URL = "./JS/dummy_data/team.json";
 
-    const params = {
-        "Param.1": team,
-        "Param.2": from,
-        "Param.3": to,
-    };
-    ajaxCall(
-        API_URL,
-        params,
-        function (result) {
-            const dataList = result.Rowsets.Rowset ?
-                result.Rowsets.Rowset[0].Row : [];
+    // const params = {
+    //     "Param.1": team,
+    //     "Param.2": from,
+    //     "Param.3": to,
+    // };
+    $.ajax({
+        type: "GET",
+        url: 'get-ProblemSolving',
+        data: {
+            'team': team,
+            'fromDate': moment(from).format("YYYY-MM-DD"),
+            'toDate': moment(to).format("YYYY-MM-DD"),
+        },
+        success: function (result) {
+            console.log("CAPA---------", result);
+
             var htm = "";
-            if (dataList && dataList.length > 0) {
-                console.log("sd", dataList);
+            if (result && result.length > 0) {
+                console.log("sd", result);
                 // var currentdate = moment().format("MM/DD/YYYY") + " 00:00:00";
                 //console.log("cur", currentdate);
                 var currentdate = new Date();
                 currentdate.setHours(0, 0, 0, 0);
                 console.log("cur", currentdate);
-                const _filterOverdue = dataList.filter(
+                const _filterOverdue = result.filter(
                     (x) =>
-                        new Date(x.DATE_SUBMISSION) < currentdate && x.STATUS !== "Closed"
+                        new Date(x.date_submission) < currentdate && x.status !== "Closed"
                 );
                 console.log("overdue", _filterOverdue);
-                const _filterClosed = dataList.filter((x) => x.STATUS === "Closed");
+                const _filterClosed = result.filter((x) => x.status === "Closed");
                 console.log("closed", _filterOverdue);
-                const _filter = dataList.filter(
+                const _filter = result.filter(
                     (x) =>
-                        x.STATUS !== "Closed" && new Date(x.DATE_SUBMISSION) >= currentdate
+                        x.status !== "Closed" && new Date(x.date_submission) >= currentdate
                 );
                 console.log("others", _filterOverdue);
                 const datalists = [..._filterOverdue, ..._filter, ..._filterClosed];
                 $.each(datalists, function (i, item) {
-                    var closuredate = new Date(item.DATE_SUBMISSION);
+                    var closuredate = new Date(item.date_submission);
                     console.log("close", closuredate);
                     var overdue =
-                        closuredate < currentdate && item.STATUS != "Closed" ?
+                        closuredate < currentdate && item.status != "Closed" ?
                             "overdue" :
                             "";
-                    if (item.STATUS == "Closed") {
-                        if (item.ASSESSMENT_STATUS == "Approved") {
+                    if (item.status == "Closed") {
+                        if (item.assessment_status == "Approved") {
                             htm +=
                                 "<tr class='" +
                                 overdue +
                                 "'><td>" +
                                 (i + 1) +
                                 "</td><td colspan='2'>" +
-                                item.KPI +
+                                item.kpi +
                                 "</td><td>" +
-                                item.PROBLEM +
+                                item.problem +
                                 "</td><td>" +
-                                dateConvert(item.DATE_ALLOCATION) +
+                                dateConvert(item.date_allocation) +
                                 "</td><td>" +
-                                dateConvert(item.DATE_SUBMISSION) +
+                                dateConvert(item.date_submission) +
                                 "</td><td>" +
-                                item.PARTICIPANTS_NAMES +
+                                item.participants_names +
                                 "</td><td>" +
-                                item.STATUS +
+                                item.status +
                                 "</td><td>" +
-                                item.OTHERS +
+                                item.other_s +
                                 "</td><td>" +
                                 "Approved by Block Manager" +
                                 "</td>" +
@@ -1648,30 +1589,30 @@ function _table() {
                                 "'><td>" +
                                 (i + 1) +
                                 "<td colspan='2'>" +
-                                item.KPI +
+                                item.kpi +
                                 "</td><td>" +
-                                item.PROBLEM +
+                                item.problem +
                                 "</td><td>" +
-                                dateConvert(item.DATE_ALLOCATION) +
+                                dateConvert(item.date_allocation) +
                                 "</td><td>" +
-                                dateConvert(item.DATE_SUBMISSION) +
+                                dateConvert(item.date_submission) +
                                 "</td><td>" +
-                                item.PARTICIPANTS_NAMES +
+                                item.participants_names +
                                 "</td><td>" +
-                                item.STATUS +
+                                item.status +
                                 "</td><td>" +
-                                item.OTHERS +
+                                item.other_s +
                                 "</td><td>" +
                                 "<button id='assessment_" +
-                                item.CAPAID +
+                                item.capaid +
                                 "' class='" +
-                                (item.ASSESSMENT_STATUS != "Approved" ?
+                                (item.assessment_status != "Approved" ?
                                     "waves-effect waves-light btn red asses" :
                                     "waves-effect waves-light btn asses") +
                                 "' onclick='assessmentmodel(" +
-                                item.CAPAID +
+                                item.capaid +
                                 ")'>" +
-                                (item.ASSESSMENT_STATUS != "Approved" ?
+                                (item.assessment_status != "Approved" ?
                                     "Approval Pending" :
                                     "Approved") +
                                 "</button>" +
@@ -1693,27 +1634,27 @@ function _table() {
                             "'><td>" +
                             (i + 1) +
                             "<td colspan='2'>" +
-                            item.KPI +
+                            item.kpi +
                             "</td><td>" +
-                            item.PROBLEM +
+                            item.problem +
                             "</td><td>" +
-                            dateConvert(item.DATE_ALLOCATION) +
+                            dateConvert(item.date_allocation) +
                             "</td><td>" +
-                            dateConvert(item.DATE_SUBMISSION) +
+                            dateConvert(item.date_submission) +
                             "</td><td>" +
-                            item.PARTICIPANTS_NAMES +
+                            item.participants_names +
                             "</td><td>" +
-                            item.STATUS +
+                            item.status +
                             "</td><td>" +
-                            item.OTHERS +
+                            item.other_s +
                             "</td><td> Problem Solving Still Open!" +
                             "</td>" +
                             "<td class=" +
                             "action" +
-                            item.STATUS +
+                            item.status +
                             "><span>---</span><span class=" +
                             "action" +
-                            item.STATUS +
+                            item.status +
                             " s" +
                             " id='edit" +
                             "'onclick='modal1open(" +
@@ -1722,10 +1663,10 @@ function _table() {
                             "Edit" +
                             "</span></td><td class=" +
                             "action" +
-                            item.STATUS +
+                            item.status +
                             "><span>---</span><span class=" +
                             "action" +
-                            item.STATUS +
+                            item.status +
                             " id='delete" +
                             "'onclick='deleteTasks(" +
                             JSON.stringify(item) +
@@ -1748,10 +1689,186 @@ function _table() {
                 $("#_tasks tbody").html(noData);
             }
         },
-        function (err) {
+        function(err) {
             console.log("err", err);
         }
-    );
+    });
+    // ajaxCall(
+    //     API_URL,
+    //     params,
+    //     function (result) {
+    //         const dataList = result.Rowsets.Rowset ?
+    //             result.Rowsets.Rowset[0].Row : [];
+    //         var htm = "";
+    //         if (dataList && dataList.length > 0) {
+    //             console.log("sd", dataList);
+    //             // var currentdate = moment().format("MM/DD/YYYY") + " 00:00:00";
+    //             //console.log("cur", currentdate);
+    //             var currentdate = new Date();
+    //             currentdate.setHours(0, 0, 0, 0);
+    //             console.log("cur", currentdate);
+    //             const _filterOverdue = dataList.filter(
+    //                 (x) =>
+    //                     new Date(x.DATE_SUBMISSION) < currentdate && x.STATUS !== "Closed"
+    //             );
+    //             console.log("overdue", _filterOverdue);
+    //             const _filterClosed = dataList.filter((x) => x.STATUS === "Closed");
+    //             console.log("closed", _filterOverdue);
+    //             const _filter = dataList.filter(
+    //                 (x) =>
+    //                     x.STATUS !== "Closed" && new Date(x.DATE_SUBMISSION) >= currentdate
+    //             );
+    //             console.log("others", _filterOverdue);
+    //             const datalists = [..._filterOverdue, ..._filter, ..._filterClosed];
+    //             $.each(datalists, function (i, item) {
+    //                 var closuredate = new Date(item.DATE_SUBMISSION);
+    //                 console.log("close", closuredate);
+    //                 var overdue =
+    //                     closuredate < currentdate && item.STATUS != "Closed" ?
+    //                         "overdue" :
+    //                         "";
+    //                 if (item.STATUS == "Closed") {
+    //                     if (item.ASSESSMENT_STATUS == "Approved") {
+    //                         htm +=
+    //                             "<tr class='" +
+    //                             overdue +
+    //                             "'><td>" +
+    //                             (i + 1) +
+    //                             "</td><td colspan='2'>" +
+    //                             item.KPI +
+    //                             "</td><td>" +
+    //                             item.PROBLEM +
+    //                             "</td><td>" +
+    //                             dateConvert(item.DATE_ALLOCATION) +
+    //                             "</td><td>" +
+    //                             dateConvert(item.DATE_SUBMISSION) +
+    //                             "</td><td>" +
+    //                             item.PARTICIPANTS_NAMES +
+    //                             "</td><td>" +
+    //                             item.STATUS +
+    //                             "</td><td>" +
+    //                             item.OTHERS +
+    //                             "</td><td>" +
+    //                             "Approved by Block Manager" +
+    //                             "</td>" +
+    //                             "<td><button class='waves-effect waves-light btn-small pink darken-4' onclick='exportcapa(" +
+    //                             JSON.stringify(item) +
+    //                             ")'>Download</button></td><td>---</td><td style='cursor:pointer' onclick='verifyidentity(" +
+    //                             JSON.stringify(item) +
+    //                             ")'>" +
+    //                             "Delete" +
+    //                             "</td></tr>";
+    //                     } else {
+    //                         htm +=
+    //                             "<tr class='" +
+    //                             overdue +
+    //                             "'><td>" +
+    //                             (i + 1) +
+    //                             "<td colspan='2'>" +
+    //                             item.KPI +
+    //                             "</td><td>" +
+    //                             item.PROBLEM +
+    //                             "</td><td>" +
+    //                             dateConvert(item.DATE_ALLOCATION) +
+    //                             "</td><td>" +
+    //                             dateConvert(item.DATE_SUBMISSION) +
+    //                             "</td><td>" +
+    //                             item.PARTICIPANTS_NAMES +
+    //                             "</td><td>" +
+    //                             item.STATUS +
+    //                             "</td><td>" +
+    //                             item.OTHERS +
+    //                             "</td><td>" +
+    //                             "<button id='assessment_" +
+    //                             item.CAPAID +
+    //                             "' class='" +
+    //                             (item.ASSESSMENT_STATUS != "Approved" ?
+    //                                 "waves-effect waves-light btn red asses" :
+    //                                 "waves-effect waves-light btn asses") +
+    //                             "' onclick='assessmentmodel(" +
+    //                             item.CAPAID +
+    //                             ")'>" +
+    //                             (item.ASSESSMENT_STATUS != "Approved" ?
+    //                                 "Approval Pending" :
+    //                                 "Approved") +
+    //                             "</button>" +
+    //                             "</td>" +
+    //                             "<td onclick='modal1open(" +
+    //                             JSON.stringify(item) +
+    //                             ")'>" +
+    //                             "Edit" +
+    //                             "</td><td>---</td><td style='cursor:pointer' onclick='verifyidentity(" +
+    //                             JSON.stringify(item) +
+    //                             ")'>" +
+    //                             "Delete" +
+    //                             "</td></tr>";
+    //                     }
+    //                 } else {
+    //                     htm +=
+    //                         "<tr class='" +
+    //                         overdue +
+    //                         "'><td>" +
+    //                         (i + 1) +
+    //                         "<td colspan='2'>" +
+    //                         item.KPI +
+    //                         "</td><td>" +
+    //                         item.PROBLEM +
+    //                         "</td><td>" +
+    //                         dateConvert(item.DATE_ALLOCATION) +
+    //                         "</td><td>" +
+    //                         dateConvert(item.DATE_SUBMISSION) +
+    //                         "</td><td>" +
+    //                         item.PARTICIPANTS_NAMES +
+    //                         "</td><td>" +
+    //                         item.STATUS +
+    //                         "</td><td>" +
+    //                         item.OTHERS +
+    //                         "</td><td> Problem Solving Still Open!" +
+    //                         "</td>" +
+    //                         "<td class=" +
+    //                         "action" +
+    //                         item.STATUS +
+    //                         "><span>---</span><span class=" +
+    //                         "action" +
+    //                         item.STATUS +
+    //                         " s" +
+    //                         " id='edit" +
+    //                         "'onclick='modal1open(" +
+    //                         JSON.stringify(item) +
+    //                         ")'>" +
+    //                         "Edit" +
+    //                         "</span></td><td class=" +
+    //                         "action" +
+    //                         item.STATUS +
+    //                         "><span>---</span><span class=" +
+    //                         "action" +
+    //                         item.STATUS +
+    //                         " id='delete" +
+    //                         "'onclick='deleteTasks(" +
+    //                         JSON.stringify(item) +
+    //                         ")'>" +
+    //                         "Close" +
+    //                         "</span></td><td style='cursor:pointer' onclick='verifyidentity(" +
+    //                         JSON.stringify(item) +
+    //                         ")'>" +
+    //                         "Delete" +
+    //                         "</td></tr>";
+    //                 }
+    //             });
+    //             $("#_tasks tbody").html(htm);
+    //         } else {
+    //             // console.log("no data for table");
+    //             var noData =
+    //                 "<tr><td colspan='12' class='text-center'>" +
+    //                 "No Data" +
+    //                 "</td></tr>";
+    //             $("#_tasks tbody").html(noData);
+    //         }
+    //     },
+    //     function (err) {
+    //         console.log("err", err);
+    //     }
+    // );
 }
 
 function dateConvert(DATE) {
@@ -1842,7 +1959,7 @@ function tasksInsert(
             //   $("#modal1").modal("close");
             //   _table(_team);
             // }
-            $("#modal1").modal("close");
+            $("#modal3").modal("close");
             _table();
             executeStatus(_team);
         },
@@ -1929,7 +2046,7 @@ function tasksUpdate(
         params,
         function (result) {
             $("#btn_packing").removeClass("enable");
-            $("#modal1").modal("close");
+            $("#modal3").modal("close");
             _table();
         },
         function (err) {
@@ -1948,14 +2065,15 @@ function tasksData() {
     const _Kpi_hit_on = $("#_Kpi_hit_on").val();
     const _creationDate = $("#_creationDate").val();
     const _submissiondate = $("#_submissiondate").val();
-    //   const _participants = $("#_participants").val();
+    // const _participants = $("#_participants").val();
     var selected = [];
     for (var option of document.getElementById('_participants').options) {
         if (option.selected) {
             selected.push(option.value);
         }
     }
-   // alert("CAPA SAVED");
+    // alert(selected);
+
     const _participants = selected.join(",");
     const step1what = $("#step1what").val();
     const step1where = $("#step1where").val();
@@ -1970,13 +2088,17 @@ function tasksData() {
     var makeitstick = [];
     if ($("#OPL").is(":checked")) {
         makeitstick.push($("#OPL").val());
-    } else if ($("#SOP").is(":checked")) {
+    }
+    if ($("#SOP").is(":checked")) {
         makeitstick.push($("#SOP").val());
-    } else if ($("#Training").is(":checked")) {
+    }
+    if ($("#Training").is(":checked")) {
         makeitstick.push($("#Training").val());
-    } else if ($("#Gemba").is(":checked")) {
+    }
+    if ($("#Gemba").is(":checked")) {
         makeitstick.push($("#Gemba").val());
-    } else if ($("#pokeyoke").is(":checked")) {
+    }
+    if ($("#pokeyoke").is(":checked")) {
         makeitstick.push($("#pokeyoke").val());
     } else {
         makeitstick = [];
@@ -1996,30 +2118,27 @@ function tasksData() {
     const assessedby = $("#assessedby").val();
     const assessedbydate = $("#assessedbydate").val();
     const capaid = $("#_SNO").val();
+    // const kpihiton = $("#_Kpi_hit_on").val();
+    // const teamname = $("#_TECHNOCRATS").val();
+    const CAPA = $("#CAPA").val();
+    const capawhat = $("#capawhat").val();
+    const capawho = $("#capawho").val();
+    const capawhen = $("#capawhen").val();
+    const capastatus = $("#capastatus").val();
     //Dont Edit
     const _label = $("#insert_Edit").val();
+    const makeitstickString = makeitstick.toString();
     var _kpi = "";
     if (_label != 'Edit') {
         _kpi = $("#_kpi").val();
     } else {
         _kpi = $("#_kpiedit").val();
     }
-    // console.log(
-    //   "err",
-    //   _team,
-    //   _who,
-    //   _kpi,
-    //   _what,
-    //   _lastDate,
-    //   _creationDate,
-    //   _textarea,
-    //   _closureDate,
-    //   _solving,
-    //   _actionable
-    // );
     document.getElementById("packing_err").style.display = "none";
     const yetname = _participants;
-    const dataC = _kpi && _participants && _creationDate && _Kpi_hit_on && _submissiondate && problem;
+    const dataC = _kpi.concat(_participants, _creationDate, _Kpi_hit_on, _submissiondate, step1what);
+    //&& step1when && step1where && step1who && howbig;
+    // && evidance && brainstorming && maincause && subcause1&& CAPA && capawhat && capawho && capawhen && capastatus;
     if (dataC) {
         if (_participants != 'Yet to Assign' || _participants != '') {
             $("#btn_packing").addClass("enable");
@@ -2042,7 +2161,7 @@ function tasksData() {
                     howbig,
                     brainstorming,
                     problem,
-                    makeitstick,
+                    makeitstickString,
                     analyseman,
                     analysemethod,
                     analysemeasurement,
@@ -2075,7 +2194,7 @@ function tasksData() {
                     howbig,
                     brainstorming,
                     problem,
-                    makeitstick,
+                    makeitstickString,
                     analyseman,
                     analysemethod,
                     analysemeasurement,
@@ -2099,14 +2218,21 @@ function tasksData() {
             // console.log("err", absent_number, absent_date);
         }
     } else {
-        const err = !_kpi ? "Name of KPI" : !_participants ? "Participants" : !problem ? "Problem" :
-            !_creationDate ?
-                "Creation Date" :
-                !_Kpi_hit_on ?
-                    "KPI Hit On" :
-                    !_submissiondate ?
-                        "Submission Date" :
-                        "Date";
+        const err = !_kpi ?
+            "Name of KPI" :
+            !_participants ?
+                "Participants" :
+                !_creationDate ?
+                    "Creation Date" :
+                    !_Kpi_hit_on ?
+                        "KPI Hit On" :
+                        !_submissiondate ?
+                            "Submission Date" :
+                            !step1what ? "Step 1 What" : !step1when ? "Step 1 When" : !step1where ? "Step 1 Where" : !step1who ? "Step 1 Who" :
+                                !howbig ? "HowBig" :
+                                    //  !evidance ? "Evidance" : !brainstorming ? "Brainstroming" : !maincause ? "MainCause" : !subcause1 ? "SubCause" :
+                                    // !CAPA ? "CAPA" : !capawhat ? "Capa What" : !capawho ? "Capa Who" : !capawhen ? "Capa When" : !capastatus ? "CapaStatus"
+                                    "Date";
         const _err = err + " field is missing";
         document.getElementById("packing_err").style.display = "block";
         $("#packing_err").text(_err);
@@ -2118,6 +2244,8 @@ function tasksData() {
 }
 
 function modal1open(data) {
+    document.getElementById('modal3form_id').reset()
+
     const label = !data ? "Insert" : "Edit";
     $("#insert_Edit").val(label);
 
@@ -2152,22 +2280,19 @@ function modal1open(data) {
     const ASSESSED_BY = !data ? "" : data.ASSESSED_BY;
     const ASSESSED_BY_DATE = !data ? "" : data.ASSESSED_BY_DATE;
     const PARTICIPANTS_NAMES = !data ? "" : data.PARTICIPANTS_NAMES.split(",");
-
     const CAPAID = !data ? "" : data.CAPAID;
     $("#_5why tbody").empty();
     $("#_capa tbody").empty();
     edit5why(KPI, KPIHITON, TEAMNAME);
     editcapa(KPI, KPIHITON, TEAMNAME);
     $("#wipT").text(!data ? "Create " : "Update ");
-
     $("#_SNO").val(CAPAID);
-    $("#_kpi").val(KPI);
+
     $("#_kpiedit").val(KPI);
     $("#_Kpi_hit_on").val(KPIHITON);
     $("#_creationDate").val(DATE_ALLOCATION);
     $("#_submissiondate").val(DATE_SUBMISSION);
     $("#_participants").val(PARTICIPANTS_NAMES);
-    //$("#_participants").val(PARTICIPANTS_NAMES);
     $("#step1what").val(WHAT);
     $("#step1where").val(WHERE);
     $("#step1when").val(WHEN);
@@ -2193,237 +2318,44 @@ function modal1open(data) {
     $("#assessedby").val(ASSESSED_BY);
     $("#assessedbydate").val(ASSESSED_BY_DATE);
 
-    var today = new Date();
-    var endDate = new Date();
-    endDate.setDate(endDate.getDay() - 7);
-    var CREATION_DATE =
-        data && data.DATE_ALLOCATION ? data.DATE_ALLOCATION : moment();
-    $('input[name="_creationDate"]').daterangepicker({
-        singleDatePicker: true,
-        // autoUpdateInput :false,
-        autoApply: true,
-        showDropdowns: true,
-        minYear: 1901,
-        maxYear: parseInt(moment().format("YYYY"), 1),
-        startDate: CREATION_DATE,
-        maxDate: today,
-        locale: {
-            format: "MM-DD-YYYY",
-        },
-    },
-        function (start, end, label) {
-            // console.log(
-            //   "A new date selection was made: " + start.format("YYYY-MM-DD")
-            // );
+    if ($("#wipT").text() == "Update ") {
+        $("#_kpi").text([]);
+
+
+        console.log("sucessssssssss - edit");
+        $('#_kpi').append(`<option value="` + data.KPI + `">` + data.KPI + `</option>`);
+
+        // $('#_kpi').find(":selected").text(data.KPI);
+    } else {
+        KpiDrop(TEAMNAME);
+        // $('#_kpi').text()
+        $("#_kpi").val(KPI);
+    }
+    if (MAKE_IT_STICK != "") {
+        const makeitstickArray = MAKE_IT_STICK.split(",");
+        for (var temp_i = 0; temp_i < makeitstickArray.length; temp_i++) {
+
+
+            if (makeitstickArray[temp_i] == "OPL") {
+                $("#OPL").prop("checked", true);
+
+            } else if (makeitstickArray[temp_i] == "SOP") {
+                $("#SOP").prop("checked", true);
+
+            } else if (makeitstickArray[temp_i] == "Training") {
+                $("#Training").prop("checked", true);
+
+            } else if (makeitstickArray[temp_i] == "Gemba") {
+                $("#Gemba").prop("checked", true);
+
+            } else if (makeitstickArray[temp_i] == "Poke Yoke/Modification") {
+                $("#pokeyoke").prop("checked", true);
+
+            }
+
         }
-    );
 
-    var KPIHITDATE = data && data.KPIHITON ? data.KPIHITON : moment();
-    $('input[name="_Kpi_hit_on"]').daterangepicker({
-        singleDatePicker: true,
-        // autoUpdateInput :false,
-        autoApply: true,
-        showDropdowns: true,
-        minYear: 1901,
-        maxYear: parseInt(moment().format("YYYY"), 1),
-        startDate: KPIHITDATE,
-        maxDate: today,
-        locale: {
-            format: "MM-DD-YYYY",
-        },
-    },
-        function (start, end, label) { }
-    );
-    var subdate = data && data.DATE_SUBMISSION ? data.DATE_SUBMISSION : moment().add('2', 'days');
-    $('input[name="_submissiondate"]').daterangepicker({
-        singleDatePicker: true,
-        // autoUpdateInput :false,
-        autoApply: true,
-        showDropdowns: true,
-        minYear: 1901,
-        maxYear: parseInt(moment().format("YYYY"), 1),
-        startDate: subdate,
-        minDate: subdate,
-        locale: {
-            format: "MM-DD-YYYY",
-        },
-    });
-    var prepareddate =
-        data && data.PREPARED_BY_DATE ? data.PREPARED_BY_DATE : moment();
-    $('input[name="preparedbydate"]').daterangepicker({
-        singleDatePicker: true,
-        // autoUpdateInput :false,
-        autoApply: true,
-        showDropdowns: true,
-        minYear: 1901,
-        maxYear: parseInt(moment().format("YYYY"), 1),
-        startDate: prepareddate,
-        maxDate: today,
-        locale: {
-            format: "MM-DD-YYYY",
-        },
-    });
-    var revieweddate =
-        data && data.REVIEWED_BY_DATE ? data.REVIEWED_BY_DATE : moment();
-    $('input[name="reviewedbydate"]').daterangepicker({
-        singleDatePicker: true,
-        // autoUpdateInput :false,
-        autoApply: true,
-        showDropdowns: true,
-        minYear: 1901,
-        "drops": "up",
-        maxYear: parseInt(moment().format("YYYY"), 1),
-        startDate: revieweddate,
-        maxDate: today,
-        locale: {
-            format: "MM-DD-YYYY",
-        },
-    });
-    var assesseddate =
-        data && data.ASSESSED_BY_DATE ? data.ASSESSED_BY_DATE : moment();
-    $('input[name="assessedbydate"]').daterangepicker({
-        singleDatePicker: true,
-        // autoUpdateInput :false,
-        autoApply: true,
-        "drops": "up",
-        showDropdowns: true,
-        minYear: 1901,
-        maxYear: parseInt(moment().format("YYYY"), 1),
-        startDate: assesseddate,
-        maxDate: today,
-        locale: {
-            format: "MM-DD-YYYY",
-        },
-    });
-
-    document.getElementById("_submissiondate").disabled = !data ? false : true;
-    document.getElementById("_kpi").disabled = !data ? false : true;
-    // var tomorowDate = new Date();
-    // tomorowDate.setDate(tomorowDate.getDate() + 1);
-    // var CLOSURE_DATE =
-    //   data && data.CLOSURE_DATE ? data.CLOSURE_DATE : tomorowDate;
-    // $('input[name="_closureDate"]').daterangepicker(
-    //   {
-    //     singleDatePicker: true,
-    //     // autoUpdateInput :false,
-    //     autoApply: true,
-    //     showDropdowns: true,
-    //     minYear: parseInt(moment().format("YYYY"), 1),
-    //     // maxYear: parseInt(moment().format("YYYY"), 1),
-    //     startDate: CLOSURE_DATE,
-    //     minDate: tomorowDate,
-    //     locale: {
-    //       format: "MM-DD-YYYY",
-    //     },
-    //   },
-    //   function (start, end, label) {
-    //     // console.log(
-    //     //   "A new date selection was made: " + start.format("YYYY-MM-DD")
-    //     // );
-    //   }
-    // );
-    // var LAST_UPDATED = data && data.LAST_UPDATED ? data.LAST_UPDATED : moment();
-    // $('input[name="_lastDate"]').daterangepicker(
-    //   {
-    //     singleDatePicker: true,
-    //     // autoUpdateInput :false,
-    //     autoApply: true,
-    //     showDropdowns: true,
-    //     minYear: 1901,
-    //     maxYear: parseInt(moment().format("YYYY"), 1),
-    //     startDate: today,
-    //     maxDate: today,
-    //     locale: {
-    //       format: "MM-DD-YYYY",
-    //     },
-    //   },
-    //   function (start, end, label) {
-    //     // console.log(
-    //     //   "A new date selection was made: " + start.format("YYYY-MM-DD")
-    //     // );
-    //   }
-    // );
-
-    $("#modal1").modal("open");
-
-    // console.log("dd", data);
-}
-function modal3open(data) {
-    const label = !data ? "Insert" : "Edit";
-    $("#insert_Edit").val(label);
-
-    const KPI = !data ? "" : data.KPI;
-    const TEAMNAME = !data ? "" : data.TEAM_NAME;
-    const KPIHITON = !data ? "" : data.KPIHITON;
-    const DATE_ALLOCATION = !data ? "" : data.DATE_ALLOCATION;
-    const DATE_SUBMISSION = !data ? "" : data.DATE_SUBMISSION;
-    const WHAT = !data ? "" : data.WHAT;
-    const WHERE = !data ? "" : data.WHERE_S1;
-    const WHEN = !data ? "" : data.WHEN_S1;
-    const WHO = !data ? "" : data.WHO;
-    const WHY = !data ? "" : data.WHY;
-    const HOWBIG = !data ? "" : data.HOWBIG;
-    const EVIDANCE_LINKS = !data ? "" : data.EVIDANCE_LINKS;
-    const CORRECTION = !data ? "" : data.CORRECTION;
-    const ANALYSE_MAN = !data ? "" : data.ANALYSE_MAN;
-    const ANALYSE_METHOD = !data ? "" : data.ANALYSE_METHOD;
-    const ANALYSE_MEASUREMENT = !data ? "" : data.ANALYSE_MEASUREMENT;
-    const ANALYSE_MACHINE = !data ? "" : data.ANALYSE_MACHINE;
-    const ANALYSE_MATERIAL = !data ? "" : data.ANALYSE_MATERIAL;
-    const ANALYSE_ENVIORNMENT = !data ? "" : data.ANALYSE_ENVIORNMENT;
-    const BRAINSTORMING_TOOL = !data ? "" : data.BRAINSTORMING_TOOL;
-    const PROBLEM = !data ? "" : data.PROBLEM;
-    const MAKE_IT_STICK = !data ? "" : data.MAKE_IT_STICK;
-    const PM_SCHEDULE = !data ? "" : data.PM_SCHEDULE;
-    const OTHERS = !data ? "" : data.OTHERS;
-    const PREPARED_BY = !data ? "" : data.PREPARED_BY;
-    const PREPARED_BY_DATE = !data ? "" : data.PREPARED_BY_DATE;
-    const REVIEWED_BY = !data ? "" : data.REVIEWED_BY;
-    const REVIEWED_BY_DATE = !data ? "" : data.REVIEWED_BY_DATE;
-    const ASSESSED_BY = !data ? "" : data.ASSESSED_BY;
-    const ASSESSED_BY_DATE = !data ? "" : data.ASSESSED_BY_DATE;
-    const PARTICIPANTS_NAMES = !data ? "" : data.PARTICIPANTS_NAMES.split(",");
-
-    const CAPAID = !data ? "" : data.CAPAID;
-    $("#_5why tbody").empty();
-    $("#_capa tbody").empty();
-    edit5why(KPI, KPIHITON, TEAMNAME);
-    editcapa(KPI, KPIHITON, TEAMNAME);
-    $("#wipT").text(!data ? "Create " : "Update ");
-
-    $("#_SNO").val(CAPAID);
-    $("#_kpi").val(KPI);
-    $("#_kpiedit").val(KPI);
-    $("#_Kpi_hit_on").val(KPIHITON);
-    $("#_creationDate").val(DATE_ALLOCATION);
-    $("#_submissiondate").val(DATE_SUBMISSION);
-    $("#_participants").val(PARTICIPANTS_NAMES);
-    //$("#_participants").val(PARTICIPANTS_NAMES);
-    $("#step1what").val(WHAT);
-    $("#step1where").val(WHERE);
-    $("#step1when").val(WHEN);
-    $("#step1who").val(WHO);
-    $("#step1why").val(WHY);
-    $("#howbig").val(HOWBIG);
-    $("#evidance").val(EVIDANCE_LINKS);
-    $("#correction").val(CORRECTION);
-    $("#brainstorming").val(BRAINSTORMING_TOOL);
-    $("#problem").val(PROBLEM);
-    $("#analyseman").val(ANALYSE_MAN);
-    $("#analysemethod").val(ANALYSE_METHOD);
-    $("#analysemeasurement").val(ANALYSE_MEASUREMENT);
-    $("#analysemachine").val(ANALYSE_MACHINE);
-    $("#analysematerial").val(ANALYSE_MATERIAL);
-    $("#analyseenvironment").val(ANALYSE_ENVIORNMENT);
-    $("#pmschedule").val(PM_SCHEDULE);
-    $("#others").val(OTHERS);
-    $("#preparedby").val(PREPARED_BY);
-    $("#preparedbydate").val(PREPARED_BY_DATE);
-    $("#reviewedby").val(REVIEWED_BY);
-    $("#reviewedbydate").val(REVIEWED_BY_DATE);
-    $("#assessedby").val(ASSESSED_BY);
-    $("#assessedbydate").val(ASSESSED_BY_DATE);
-
+    }
     var today = new Date();
     var endDate = new Date();
     endDate.setDate(endDate.getDay() - 7);
@@ -2604,7 +2536,7 @@ function closetasksData() {
             params,
             function (result) {
                 $("#btn_packing").removeClass("enable");
-                $("#modal1").modal("close");
+                $("#modal3").modal("close");
                 _table();
             },
             function (err) {
@@ -2616,6 +2548,243 @@ function closetasksData() {
     }
 }
 
+function modal3open(data) {
+    document.getElementById('modal3form_id').reset()
+
+    const label = !data ? "Insert" : "Edit";
+    $("#insert_Edit").val(label);
+
+
+    const KPI = !data ? "" : data.KPI;
+    const TEAMNAME = !data ? "" : data.TEAM_NAME;
+    const KPIHITON = !data ? "" : data.KPIHITON;
+    const DATE_ALLOCATION = !data ? "" : data.DATE_ALLOCATION;
+    const DATE_SUBMISSION = !data ? "" : data.DATE_SUBMISSION;
+    const WHAT = !data ? "" : data.WHAT;
+    const WHERE = !data ? "" : data.WHERE_S1;
+    const WHEN = !data ? "" : data.WHEN_S1;
+    const WHO = !data ? "" : data.WHO;
+    const WHY = !data ? "" : data.WHY;
+    const HOWBIG = !data ? "" : data.HOWBIG;
+    const EVIDANCE_LINKS = !data ? "" : data.EVIDANCE_LINKS;
+    const CORRECTION = !data ? "" : data.CORRECTION;
+    const ANALYSE_MAN = !data ? "" : data.ANALYSE_MAN;
+    const ANALYSE_METHOD = !data ? "" : data.ANALYSE_METHOD;
+    const ANALYSE_MEASUREMENT = !data ? "" : data.ANALYSE_MEASUREMENT;
+    const ANALYSE_MACHINE = !data ? "" : data.ANALYSE_MACHINE;
+    const ANALYSE_MATERIAL = !data ? "" : data.ANALYSE_MATERIAL;
+    const ANALYSE_ENVIORNMENT = !data ? "" : data.ANALYSE_ENVIORNMENT;
+    const BRAINSTORMING_TOOL = !data ? "" : data.BRAINSTORMING_TOOL;
+    const PROBLEM = !data ? "" : data.PROBLEM;
+    const MAKE_IT_STICK = !data ? "" : data.MAKE_IT_STICK;
+    const PM_SCHEDULE = !data ? "" : data.PM_SCHEDULE;
+    const OTHERS = !data ? "" : data.OTHERS;
+    const PREPARED_BY = !data ? "" : data.PREPARED_BY;
+    const PREPARED_BY_DATE = !data ? "" : data.PREPARED_BY_DATE;
+    const REVIEWED_BY = !data ? "" : data.REVIEWED_BY;
+    const REVIEWED_BY_DATE = !data ? "" : data.REVIEWED_BY_DATE;
+    const ASSESSED_BY = !data ? "" : data.ASSESSED_BY;
+    const ASSESSED_BY_DATE = !data ? "" : data.ASSESSED_BY_DATE;
+    const PARTICIPANTS_NAMES = !data ? "" : data.PARTICIPANTS_NAMES.split(",");
+    KpiDrop($('#_TECHNOCRATS').find(":selected").text());
+
+    const CAPAID = !data ? "" : data.CAPAID;
+    $("#_5why tbody").empty();
+    $("#_capa tbody").empty();
+    edit5why(KPI, KPIHITON, TEAMNAME);
+    editcapa(KPI, KPIHITON, TEAMNAME);
+    $("#wipT").text(!data ? "Create " : "Update ");
+
+    $("#_SNO").val(CAPAID);
+    $("#_kpi").val(KPI);
+    $("#_kpiedit").val(KPI);
+    $("#_Kpi_hit_on").val(KPIHITON);
+    $("#_creationDate").val(DATE_ALLOCATION);
+    $("#_submissiondate").val(DATE_SUBMISSION);
+    $("#_participants").val(PARTICIPANTS_NAMES);
+    //$("#_participants").val(PARTICIPANTS_NAMES);
+    $("#step1what").val(WHAT);
+    $("#step1where").val(WHERE);
+    $("#step1when").val(WHEN);
+    $("#step1who").val(WHO);
+    $("#step1why").val(WHY);
+    $("#howbig").val(HOWBIG);
+    $("#evidance").val(EVIDANCE_LINKS);
+    $("#correction").val(CORRECTION);
+    $("#brainstorming").val(BRAINSTORMING_TOOL);
+    $("#problem").val(PROBLEM);
+    $("#analyseman").val(ANALYSE_MAN);
+    $("#analysemethod").val(ANALYSE_METHOD);
+    $("#analysemeasurement").val(ANALYSE_MEASUREMENT);
+    $("#analysemachine").val(ANALYSE_MACHINE);
+    $("#analysematerial").val(ANALYSE_MATERIAL);
+    $("#analyseenvironment").val(ANALYSE_ENVIORNMENT);
+    $("#pmschedule").val(PM_SCHEDULE);
+    $("#others").val(OTHERS);
+    $("#preparedby").val(PREPARED_BY);
+    $("#preparedbydate").val(PREPARED_BY_DATE);
+    $("#reviewedby").val(REVIEWED_BY);
+    $("#reviewedbydate").val(REVIEWED_BY_DATE);
+    $("#assessedby").val(ASSESSED_BY);
+    $("#assessedbydate").val(ASSESSED_BY_DATE);
+
+
+    var today = new Date();
+    var endDate = new Date();
+    endDate.setDate(endDate.getDay() - 7);
+    var CREATION_DATE =
+        data && data.DATE_ALLOCATION ? data.DATE_ALLOCATION : moment();
+    $('input[name="_creationDate"]').daterangepicker({
+        singleDatePicker: true,
+        // autoUpdateInput :false,
+        autoApply: true,
+        showDropdowns: true,
+        minYear: 1901,
+        maxYear: parseInt(moment().format("YYYY"), 1),
+        startDate: CREATION_DATE,
+        maxDate: today,
+        locale: {
+            format: "MM-DD-YYYY",
+        },
+    },
+        function (start, end, label) {
+            // console.log(
+            //   "A new date selection was made: " + start.format("YYYY-MM-DD")
+            // );
+        }
+    );
+
+    var KPIHITDATE = data && data.KPIHITON ? data.KPIHITON : moment();
+    $('input[name="_Kpi_hit_on"]').daterangepicker({
+        singleDatePicker: true,
+        // autoUpdateInput :false,
+        autoApply: true,
+        showDropdowns: true,
+        minYear: 1901,
+        maxYear: parseInt(moment().format("YYYY"), 1),
+        startDate: KPIHITDATE,
+        maxDate: today,
+        locale: {
+            format: "MM-DD-YYYY",
+        },
+    },
+        function (start, end, label) { }
+    );
+    var subdate = data && data.DATE_SUBMISSION ? data.DATE_SUBMISSION : moment().add('2', 'days');
+    $('input[name="_submissiondate"]').daterangepicker({
+        singleDatePicker: true,
+        // autoUpdateInput :false,
+        autoApply: true,
+        showDropdowns: true,
+        minYear: 1901,
+        maxYear: parseInt(moment().format("YYYY"), 1),
+        startDate: subdate,
+        minDate: subdate,
+        locale: {
+            format: "MM-DD-YYYY",
+        },
+    });
+    var prepareddate =
+        data && data.PREPARED_BY_DATE ? data.PREPARED_BY_DATE : moment();
+    $('input[name="preparedbydate"]').daterangepicker({
+        singleDatePicker: true,
+        // autoUpdateInput :false,
+        autoApply: true,
+        showDropdowns: true,
+        minYear: 1901,
+        maxYear: parseInt(moment().format("YYYY"), 1),
+        startDate: prepareddate,
+        maxDate: today,
+        locale: {
+            format: "MM-DD-YYYY",
+        },
+    });
+    var revieweddate =
+        data && data.REVIEWED_BY_DATE ? data.REVIEWED_BY_DATE : moment();
+    $('input[name="reviewedbydate"]').daterangepicker({
+        singleDatePicker: true,
+        // autoUpdateInput :false,
+        autoApply: true,
+        showDropdowns: true,
+        minYear: 1901,
+        "drops": "up",
+        maxYear: parseInt(moment().format("YYYY"), 1),
+        startDate: revieweddate,
+        maxDate: today,
+        locale: {
+            format: "MM-DD-YYYY",
+        },
+    });
+    var assesseddate =
+        data && data.ASSESSED_BY_DATE ? data.ASSESSED_BY_DATE : moment();
+    $('input[name="assessedbydate"]').daterangepicker({
+        singleDatePicker: true,
+        // autoUpdateInput :false,
+        autoApply: true,
+        "drops": "up",
+        showDropdowns: true,
+        minYear: 1901,
+        maxYear: parseInt(moment().format("YYYY"), 1),
+        startDate: assesseddate,
+        maxDate: today,
+        locale: {
+            format: "MM-DD-YYYY",
+        },
+    });
+
+    document.getElementById("_submissiondate").disabled = !data ? false : true;
+    document.getElementById("_kpi").disabled = !data ? false : true;
+    // var tomorowDate = new Date();
+    // tomorowDate.setDate(tomorowDate.getDate() + 1);
+    // var CLOSURE_DATE =
+    //   data && data.CLOSURE_DATE ? data.CLOSURE_DATE : tomorowDate;
+    // $('input[name="_closureDate"]').daterangepicker(
+    //   {
+    //     singleDatePicker: true,
+    //     // autoUpdateInput :false,
+    //     autoApply: true,
+    //     showDropdowns: true,
+    //     minYear: parseInt(moment().format("YYYY"), 1),
+    //     // maxYear: parseInt(moment().format("YYYY"), 1),
+    //     startDate: CLOSURE_DATE,
+    //     minDate: tomorowDate,
+    //     locale: {
+    //       format: "MM-DD-YYYY",
+    //     },
+    //   },
+    //   function (start, end, label) {
+    //     // console.log(
+    //     //   "A new date selection was made: " + start.format("YYYY-MM-DD")
+    //     // );
+    //   }
+    // );
+    // var LAST_UPDATED = data && data.LAST_UPDATED ? data.LAST_UPDATED : moment();
+    // $('input[name="_lastDate"]').daterangepicker(
+    //   {
+    //     singleDatePicker: true,
+    //     // autoUpdateInput :false,
+    //     autoApply: true,
+    //     showDropdowns: true,
+    //     minYear: 1901,
+    //     maxYear: parseInt(moment().format("YYYY"), 1),
+    //     startDate: today,
+    //     maxDate: today,
+    //     locale: {
+    //       format: "MM-DD-YYYY",
+    //     },
+    //   },
+    //   function (start, end, label) {
+    //     // console.log(
+    //     //   "A new date selection was made: " + start.format("YYYY-MM-DD")
+    //     // );
+    //   }
+    // );
+
+    $("#modal3").modal("open");
+
+    // console.log("dd", data);
+}
+
 function getActionableData() {
     const team = $("#_TECHNOCRATS").val();
     const date = $("#_daterangeTable").val();
@@ -2624,10 +2793,10 @@ function getActionableData() {
         moment(dates[0], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
     const to = moment(dates[1], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
 
-    const API =
-        "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FQuery%2FActionable%2FSELECT_CAPA_ACTIONABLE";
-    const API_URL = ipAddress + API + contentType + externalCred;
-    const Local_URL = "./JS/dummy_data/CAPA_TABLE_RESPONSE.json";
+    // const API =
+    //     "/XMII/Illuminator?QueryTemplate=SBT_MDT%2FQuery%2FActionable%2FSELECT_CAPA_ACTIONABLE";
+    // const API_URL = ipAddress + API + contentType + externalCred;
+    // const Local_URL = "./JS/dummy_data/CAPA_TABLE_RESPONSE.json";
 
     const params = {
         "Param.1": team,
@@ -2635,44 +2804,77 @@ function getActionableData() {
         "Param.3": to,
     };
 
-    ajaxCall(
-        API_URL,
-        params,
-        function (result) {
+    $.ajax({
+        type: "GET",
+        url: 'get-ProblemSolving',
+        data: {
+            'team': team,
+            'fromDate': moment(from).format("YYYY-MM-DD"),
+            'toDate': moment(to).format("YYYY-MM-DD"),
+        },
+        success: function (result) {
             console.log("GET ACTIONABLE DATA");
-            console.log(result);
-            const dataList = result.Rowsets.Rowset ?
-                result.Rowsets.Rowset[0].Row : [];
+            console.log("capaActionaalbe",result);
+           
             var htm = "";
-            if (dataList && dataList.length > 0) {
+            if (result && result.length > 0) {
                 let tdata = "";
-                $.each(dataList, function (i, item) {
-                    if (item.STATUS == 'Closed') {
-                        tdata += `<tr><td>${i + 1}</td><td colspan="3">${item.KPI}</td>
-              <td>${item.WHAT}</td>
-              <td>${dateConvert(item.CREATION_DATE)}</td>
-              <td>${dateConvert(item.CLOSURE_DATE)}</td>
-              <td>${item.MEMBER}</td>
-              <td>${dateConvert(item.LAST_UPDATEDON)}</td>
-              <td>${item.STATUS}</td>
-              <td>${item.COMMENTS}</td>
+                $.each(result, function (i, item) {
+                    if (item.status == 'Closed') {
+                        tdata += `<tr><td>${i + 1}</td><td colspan="3">${item.kpi}</td>
+              <td>${item.what}</td>
+              <td>${item.creation_date}</td>
+              <td>${dateConvert(item.closure_date)}</td>
+              <td>${item.member}</td>
+              <td>${dateConvert(item.last_updatedon)}</td>
+              <td>${item.status}</td>
+              <td>${item.comments}</td>
               <td>---</td>
               <td>---</td></tr>`;
                     } else {
-                        tdata += `<tr><td>${i + 1}</td><td colspan="3">${item.KPI}</td>
-              <td>${item.WHAT}</td>
-              <td>${dateConvert(item.CREATION_DATE)}</td>
-              <td>${dateConvert(item.CLOSURE_DATE)}</td>
-              <td>${item.MEMBER}</td>
-              <td>${dateConvert(item.LAST_UPDATEDON)}</td>
-              <td>${item.STATUS}</td>
-              <td>${item.COMMENTS}</td>
+                        var today = new Date();
+                        var dd = String(today.getDate()).padStart(2, '0');
+                        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                        var yyyy = today.getFullYear();
+
+                        today = mm + '/' + dd + '/' + yyyy;
+                        const x = new Date(today);
+                        const y = new Date(dateConvert(item.closure_date));
+                        console.log("x: ", x);
+                        console.log("y: ", y);
+
+                        if (x > y) {
+                            console.log("hello", item);
+                            tdata += `<tr style="background-color:rgba(217, 30, 24, 0.6)"><td>${i + 1}</td><td colspan="3">${item.KPI}</td>
+              <td>${item.what}</td>
+              <td>${item.creation_date}</td>
+              <td>${dateConvert(item.closure_date)}</td>
+              <td>${item.member}</td>
+              <td>${dateConvert(item.last_updatedon)}</td>
+              <td>${item.status}</td>
+              <td>${item.comments}</td>
               <td><a href="#" style="text-decoration: underline;"  onclick='modal2open(${JSON.stringify(
-                            item
-                        )})'>Edit</a></td>
+                                item
+                            )})'>Edit</a></td>
               <td><a href="#" style="text-decoration: underline;" onclick='deleteActionable(${JSON.stringify(
-                            item
-                        )})'>close</a></td></tr>`;
+                                item
+                            )})'>close</a></td></tr>`;
+                        } else {
+                            tdata += `<tr><td>${i + 1}</td><td colspan="3">${item.kpi}</td>
+              <td>${item.what}</td>
+              <td>${item.creation_date}</td>
+              <td>${dateConvert(item.closure_date)}</td>
+              <td>${item.member}</td>
+              <td>${dateConvert(item.last_updatedon)}</td>
+              <td>${item.status}</td>
+              <td>${item.comments}</td>
+              <td><a href="#" style="text-decoration: underline;"  onclick='modal2open(${JSON.stringify(
+                                item
+                            )})'>Edit</a></td>
+              <td><a href="#" style="text-decoration: underline;" onclick='deleteActionable(${JSON.stringify(
+                                item
+                            )})'>close</a></td></tr>`;
+                        }
                     }
                 });
 
@@ -2686,10 +2888,94 @@ function getActionableData() {
                 $("#_tableActionable tbody").html(noData);
             }
         },
-        function (err) {
+        function(err) {
             console.log("err", err);
         }
-    );
+    });
+    // ajaxCall(
+    //     API_URL,
+    //     params,
+    //     function (result) {
+    //         console.log("GET ACTIONABLE DATA");
+    //         console.log(result);
+    //         const dataList = result.Rowsets.Rowset ?
+    //             result.Rowsets.Rowset[0].Row : [];
+    //         var htm = "";
+    //         if (dataList && dataList.length > 0) {
+    //             let tdata = "";
+    //             $.each(dataList, function (i, item) {
+    //                 if (item.STATUS == 'Closed') {
+    //                     tdata += `<tr><td>${i + 1}</td><td colspan="3">${item.KPI}</td>
+    //           <td>${item.WHAT}</td>
+    //           <td>${dateConvert(item.CREATION_DATE)}</td>
+    //           <td>${dateConvert(item.CLOSURE_DATE)}</td>
+    //           <td>${item.MEMBER}</td>
+    //           <td>${dateConvert(item.LAST_UPDATEDON)}</td>
+    //           <td>${item.STATUS}</td>
+    //           <td>${item.COMMENTS}</td>
+    //           <td>---</td>
+    //           <td>---</td></tr>`;
+    //                 } else {
+    //                     var today = new Date();
+    //                     var dd = String(today.getDate()).padStart(2, '0');
+    //                     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    //                     var yyyy = today.getFullYear();
+
+    //                     today = mm + '/' + dd + '/' + yyyy;
+    //                     const x = new Date(today);
+    //                     const y = new Date(dateConvert(item.CLOSURE_DATE));
+    //                     console.log("x: ", x);
+    //                     console.log("y: ", y);
+
+    //                     if (x > y) {
+    //                         console.log("hello", item);
+    //                         tdata += `<tr style="background-color:rgba(217, 30, 24, 0.6)"><td>${i + 1}</td><td colspan="3">${item.KPI}</td>
+    //           <td>${item.WHAT}</td>
+    //           <td>${dateConvert(item.CREATION_DATE)}</td>
+    //           <td>${dateConvert(item.CLOSURE_DATE)}</td>
+    //           <td>${item.MEMBER}</td>
+    //           <td>${dateConvert(item.LAST_UPDATEDON)}</td>
+    //           <td>${item.STATUS}</td>
+    //           <td>${item.COMMENTS}</td>
+    //           <td><a href="#" style="text-decoration: underline;"  onclick='modal2open(${JSON.stringify(
+    //                             item
+    //                         )})'>Edit</a></td>
+    //           <td><a href="#" style="text-decoration: underline;" onclick='deleteActionable(${JSON.stringify(
+    //                             item
+    //                         )})'>close</a></td></tr>`;
+    //                     } else {
+    //                         tdata += `<tr><td>${i + 1}</td><td colspan="3">${item.KPI}</td>
+    //           <td>${item.WHAT}</td>
+    //           <td>${dateConvert(item.CREATION_DATE)}</td>
+    //           <td>${dateConvert(item.CLOSURE_DATE)}</td>
+    //           <td>${item.MEMBER}</td>
+    //           <td>${dateConvert(item.LAST_UPDATEDON)}</td>
+    //           <td>${item.STATUS}</td>
+    //           <td>${item.COMMENTS}</td>
+    //           <td><a href="#" style="text-decoration: underline;"  onclick='modal2open(${JSON.stringify(
+    //                             item
+    //                         )})'>Edit</a></td>
+    //           <td><a href="#" style="text-decoration: underline;" onclick='deleteActionable(${JSON.stringify(
+    //                             item
+    //                         )})'>close</a></td></tr>`;
+    //                     }
+    //                 }
+    //             });
+
+    //             $("#_tableActionable tbody").html(tdata);
+    //         } else {
+    //             // console.log("no data for table");
+    //             var noData =
+    //                 "<tr><td colspan='12' class='text-center'>" +
+    //                 "No Data" +
+    //                 "</td></tr>";
+    //             $("#_tableActionable tbody").html(noData);
+    //         }
+    //     },
+    //     function (err) {
+    //         console.log("err", err);
+    //     }
+    // );
 }
 
 let isEdit = "";
@@ -2765,6 +3051,12 @@ function modal2open(data) {
     });
 
     $("#modal2").modal("open");
+    $('#act_comments').keypress(
+        function (event) {
+            if (event.which == '13') {
+                event.preventDefault();
+            }
+        });
 }
 
 function createActionable() {
@@ -2899,6 +3191,7 @@ function closeActionableData() {
         }
     );
 }
+
 
 function ajaxCall(url, params, callback, error) {
     $.ajax({

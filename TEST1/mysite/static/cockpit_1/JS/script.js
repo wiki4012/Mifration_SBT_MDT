@@ -44,6 +44,8 @@ async function selectTechno() {
         $.each(result, function (i, item) {
             htm +=
                 "<option value='" +
+                item.shift +
+                "~" +
                 item.team_name +
                 "'>" +
                 item.team_name +
@@ -129,59 +131,50 @@ function memberwiseattendancereport() {
     const from =
         moment(dates[0], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
     const to = moment(dates[1], "MM/DD/YYYY").format("YYYY-MM-DD") + "T00:00:00";
-
+    console.log(team, from, to);
     $.ajax({
 
         type: "GET",
-        url: 'get-kpiCockpit_2',
+        url: 'get-attDump',
         data: {
             'team': team,
-            'date': moment(date).format("YYYY-MM-DD"),
+            'fromDate': moment(from).format("YYYY-MM-DD"),
+            'toDate': moment(to).format("YYYY-MM-DD"),
 
         },
-        success: function (result) {
-            console.log(result)
-            var blob = new Blob([result], {
-                type: 'application/ms-excel'
-            });
-            var downloadUrl = URL.createObjectURL(blob);
-            var a = document.createElement("a");
-            a.href = downloadUrl;
-            a.download = "Memberwise_attendance.csv";
-            document.body.appendChild(a);
-            a.click();
-        },
-        complete: function () {
-            //stoploader();
-        }
+        success: function (data) {
+            // var JSONData = $.getJSON("GetJsonData.php", function (data) {
+                var items = data;
+                const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+                const header = Object.keys(items[0]);
+                let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+                csv.unshift(header.join(','));
+                csv = csv.join('\r\n');
+                //Download the file as CSV
+                var downloadLink = document.createElement("a");
+                var blob = new Blob(["\ufeff", csv]);
+                var url = URL.createObjectURL(blob);
+                downloadLink.href = url;
+                downloadLink.download = "DataDump.csv";  //Name the file here
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }
     });
-    // $.ajax({
-    //     type: "GET",
-    //     //    url: "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FQuery%2FExecuteAttenPercentage&Content-Type=text/csv",
-    //     url: "/XMII/Illuminator?QueryTemplate=AP_SBT_MDT%2FTest%2FSQLSBTQuery&Content-Type=text/csv",
-    //     data: {
-    //         'Param.1': team,
-    //         'Param.2': from,
-    //         'Param.3': to
-    //     },
-    //     async: false,
-    //     success(data) {
-    //         var blob = new Blob([data], {
-    //             type: 'application/ms-excel'
-    //         });
-    //         var downloadUrl = URL.createObjectURL(blob);
-    //         var a = document.createElement("a");
-    //         a.href = downloadUrl;
-    //         a.download = "Memberwise_attendance.csv";
-    //         document.body.appendChild(a);
-    //         a.click();
-    //     },
-    //     complete: function () {
-    //         //stoploader();
-    //     }
-    // });
 }
+function JsonToCSV(result) {
+    var csvStr = JsonFields.join(",") + "\n";
 
+    result.forEach(element => {
+        AccountNumber = element.team_member;
+        AccountName = element.team_name;
+        port = element.date
+        source = element.attendance
+
+        csvStr += AccountNumber + ',' + AccountName + ',' + port + ',' + source + "\n";
+    })
+    return csvStr;
+}
 function datewiseattendancereport() {
     const split = $("#_team").val().split("~");
     const team = split[1];
@@ -358,13 +351,15 @@ async function sbtTeam() {
 }
 
 function getTeamMember() {
-    var search_word = $("#_team").val();
-    console.log(search_word);
+    const split = $("#_team").val().split("~");
+    const team = split[1];
+
+    console.log(team);
     $.ajax({
         type: "GET",
         url: 'get-team-members',
         data: {
-            'team': search_word,
+            'team': team,
         },
         success: function (result) {
             alert(result[0]["team_name"]);

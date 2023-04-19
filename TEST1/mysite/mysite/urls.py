@@ -40,7 +40,11 @@ urlpatterns = [
     path('get-TTMonthlyKpi', views.getTTbyMonth, name="get-TTMonthlyKpi"),
     path('get-kpiCockpit_2', views.getKpiCockpit_2, name="get-kpiCockpit_2"),
     path('get-kpiCurrentCockpit_2', views.getCurrentKpiCockpit_2, name="get-kpiCurrentCockpit_2"),
-        
+    path('get-attDump', views.getAttDump, name="get-attDump"),
+    path('get-capaDump', views.getCapaDump, name="get-capaDump"),
     path('get-kpiUnion', views.getKpiMonthlyUnion, name="get-kpiUnion"),
+    path('get-export', views.export, name="get-export"),
+    path('get-ProblemSolving', views.getProblemSolving, name="get-ProblemSolving"),
+    path('get-Actionables', views.getActionables, name="get-Actionables"),
         
 ] 
